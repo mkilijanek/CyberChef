@@ -35,6 +35,7 @@ import {
     searchKeymap,
     highlightSelectionMatches
 } from "@codemirror/search";
+import DOMPurify from "dompurify";
 
 import {statusBar} from "../utils/statusBar.mjs";
 import {htmlPlugin} from "../utils/htmlWidget.mjs";
@@ -350,7 +351,12 @@ class OutputWaiter {
      * @param {string} html
      */
     async setHTMLOutput(html) {
-        this.htmlOutput.html = html;
+        const sanitizedHtml = DOMPurify.sanitize(html, {
+            USE_PROFILES: {html: true},
+            FORBID_TAGS: ["script"],
+            RETURN_TRUSTED_TYPE: false
+        });
+        this.htmlOutput.html = sanitizedHtml;
         this.htmlOutput.changed = true;
         // This clears the text output, but also fires a View update which
         // triggers the htmlWidget to render the HTML. We set the force flag
@@ -364,17 +370,6 @@ class OutputWaiter {
 
         // Add class to #output-text to change display settings
         this.outputTextEl.classList.add("html-output");
-
-        // Execute script sections
-        const outputHTML = document.getElementById("output-html");
-        const scriptElements = outputHTML ? outputHTML.querySelectorAll("script") : [];
-        for (let i = 0; i < scriptElements.length; i++) {
-            try {
-                eval(scriptElements[i].innerHTML); // eslint-disable-line no-eval
-            } catch (err) {
-                log.error(err);
-            }
-        }
     }
 
     /**

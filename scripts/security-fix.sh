@@ -42,7 +42,7 @@ npm install --save-dev @babel/helpers@^7.26.10 || echo -e "${RED}Failed to updat
 
 # Update webpack-dev-server (Source code theft vulnerability)
 echo "3. Updating webpack-dev-server (GHSA-9jgg-88mc-972h)..."
-npm install --save-dev webpack-dev-server@^5.2.2 || echo -e "${RED}Failed to update webpack-dev-server${NC}"
+npm install --save-dev webpack-dev-server@^5.11.0 || echo -e "${RED}Failed to update webpack-dev-server${NC}"
 
 # Update tmp (Symlink vulnerability)
 echo "4. Updating tmp (GHSA-52f5-9888-hmc6)..."
@@ -51,6 +51,18 @@ npm install --save-dev tmp@^0.2.5 || echo -e "${RED}Failed to update tmp${NC}"
 # Update bcryptjs (Recommended update)
 echo "5. Updating bcryptjs (recommended)..."
 npm install bcryptjs@^3.0.3 || echo -e "${RED}Failed to update bcryptjs${NC}"
+
+# Update @xmldom/xmldom (multiple advisories)
+echo "6. Updating @xmldom/xmldom..."
+npm install @xmldom/xmldom@^0.9.3 || echo -e "${RED}Failed to update @xmldom/xmldom${NC}"
+
+# Update jsonwebtoken (CVE-2022-23529 and other fixes)
+echo "7. Updating jsonwebtoken..."
+npm install jsonwebtoken@^9.0.2 || echo -e "${RED}Failed to update jsonwebtoken${NC}"
+
+# Update xpath (ReDoS fixes)
+echo "8. Updating xpath..."
+npm install xpath@^0.0.35 || echo -e "${RED}Failed to update xpath${NC}"
 
 echo ""
 echo -e "${YELLOW}🔍 Running npm audit fix...${NC}"
