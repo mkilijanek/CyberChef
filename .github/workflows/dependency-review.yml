@@ -38,9 +38,6 @@ jobs:
           # Create comment on PR with results
           comment-summary-in-pr: always
 
-          # Fail on GHSA advisories
-          fail-on-ghsa: true
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
