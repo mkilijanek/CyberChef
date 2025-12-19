@@ -1,0 +1,118 @@
+name: Dependency Review
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+      - develop
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+      - 'yarn.lock'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Fail on critical and high vulnerabilities
+          fail-on-severity: high
+
+          # Allow only specific licenses
+          allow-licenses: Apache-2.0, MIT, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0
+
+          # Deny GPL and other copyleft licenses
+          deny-licenses: GPL-2.0, GPL-3.0, LGPL-2.0, LGPL-2.1, LGPL-3.0, AGPL-3.0
+
+          # Create comment on PR with results
+          comment-summary-in-pr: always
+
+          # Fail on GHSA advisories
+          fail-on-ghsa: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        id: audit
+        run: |
+          npm audit --json > pr-audit.json || true
+
+          CRITICAL=$(cat pr-audit.json | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(cat pr-audit.json | jq '.metadata.vulnerabilities.high // 0')
+          MODERATE=$(cat pr-audit.json | jq '.metadata.vulnerabilities.moderate // 0')
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
+
+      - name: Block PR if critical/high vulnerabilities
+        if: steps.audit.outputs.critical > 0 || steps.audit.outputs.high > 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const critical = ${{ steps.audit.outputs.critical }};
+            const high = ${{ steps.audit.outputs.high }};
+
+            const comment = `## ⛔ Security Review Failed
+
+            This PR introduces security vulnerabilities that must be fixed before merging:
+
+            - 🔴 Critical: ${critical}
+            - 🟠 High: ${high}
+            - 🟡 Moderate: ${{ steps.audit.outputs.moderate }}
+
+            ### Required Actions:
+            1. Run \`npm audit fix\` to attempt automatic fixes
+            2. Review and update affected dependencies manually if needed
+            3. Re-push changes after fixing vulnerabilities
+
+            **This PR cannot be merged until all critical and high vulnerabilities are resolved.**
+            `;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
+
+            core.setFailed(`PR blocked: ${critical} critical and ${high} high vulnerabilities found`);
+
+      - name: Post success comment
+        if: steps.audit.outputs.critical == 0 && steps.audit.outputs.high == 0
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const moderate = ${{ steps.audit.outputs.moderate }};
+
+            let comment = `## ✅ Security Review Passed\n\n`;
+            comment += `No critical or high severity vulnerabilities detected.\n\n`;
+
+            if (moderate > 0) {
+              comment += `⚠️ Note: ${moderate} moderate severity vulnerabilities detected. Consider fixing these before merge.\n`;
+            }
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: comment
+            });
