@@ -151,7 +151,9 @@ class PHPDeserialize extends Operation {
                     const value = read(length);
                     expect('";');
                     if (args[0]) {
-                        return '"' + value.replace(/"/g, '\\"') + '"'; // lgtm [js/incomplete-sanitization]
+                        // Use JSON.stringify to produce a properly escaped JSON string literal,
+                        // including escaping of backslashes, quotes, and control characters.
+                        return JSON.stringify(value);
                     } else {
                         return '"' + value + '"';
                     }
