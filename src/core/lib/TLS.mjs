@@ -247,7 +247,7 @@ function parseServerHello(s, b, h) {
         description: "Selected Compression Method",
         length: 1,
         data: b.getBytes(1),
-        value: s.readInt(1) // TODO: Compression method name here
+        value: COMPRESSION_METHODS_LOOKUP[s.readInt(1)] || "Unknown"
     };
 
     // Extensions Length
@@ -303,7 +303,7 @@ function parseCompressionMethods(bytes) {
             description: "Compression Method",
             length: 1,
             data: b.getBytes(1),
-            value: s.readInt(1) // TODO: Compression method name here
+            value: COMPRESSION_METHODS_LOOKUP[s.readInt(1)] || "Unknown"
         });
     }
     return cm;
@@ -835,6 +835,15 @@ export const GREASE_VALUES = [
     0xeaea,
     0xfafa
 ];
+
+/**
+ * Compression methods lookup table
+ */
+const COMPRESSION_METHODS_LOOKUP = {
+    0: "null",
+    1: "DEFLATE",
+    64: "LZS"
+};
 
 /**
  * Parses the supported_versions extension and returns the highest supported version.

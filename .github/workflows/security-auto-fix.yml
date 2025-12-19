@@ -1,0 +1,381 @@
+name: Auto-Fix Security Vulnerabilities
+
+on:
+  # Run daily at 2 AM UTC
+  schedule:
+    - cron: '0 2 * * *'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      severity_threshold:
+        description: 'Minimum severity to fix (low, moderate, high, critical)'
+        required: false
+        default: 'high'
+      create_pr:
+        description: 'Create PR instead of direct commit'
+        required: false
+        default: 'true'
+
+  # Run on push to main for testing
+  push:
+    branches:
+      - main
+    paths:
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  audit-and-fix:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Cache node modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run security audit
+        id: audit
+        run: |
+          echo "Running npm audit..."
+          npm audit --json > audit-results.json || true
+
+          # Count vulnerabilities by severity
+          CRITICAL=$(cat audit-results.json | jq '.metadata.vulnerabilities.critical // 0')
+          HIGH=$(cat audit-results.json | jq '.metadata.vulnerabilities.high // 0')
+          MODERATE=$(cat audit-results.json | jq '.metadata.vulnerabilities.moderate // 0')
+          LOW=$(cat audit-results.json | jq '.metadata.vulnerabilities.low // 0')
+          TOTAL=$(cat audit-results.json | jq '.metadata.vulnerabilities.total // 0')
+
+          echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+          echo "high=$HIGH" >> $GITHUB_OUTPUT
+          echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
+          echo "low=$LOW" >> $GITHUB_OUTPUT
+          echo "total=$TOTAL" >> $GITHUB_OUTPUT
+
+          echo "📊 Vulnerability Summary:"
+          echo "Critical: $CRITICAL"
+          echo "High: $HIGH"
+          echo "Moderate: $MODERATE"
+          echo "Low: $LOW"
+          echo "Total: $TOTAL"
+
+      - name: Analyze exploitability
+        id: exploitable
+        run: |
+          # Create script to check for actively exploited vulnerabilities
+          cat > check-exploitable.js << 'EOF'
+          const audit = require('./audit-results.json');
+
+          // Known actively exploited CVEs (update this list regularly)
+          const activelyExploited = [
+            'GHSA-4hjh-wcwx-xvwj',  // axios DoS
+            'GHSA-jr5f-v2jv-69x6',  // axios SSRF
+            // Add more as they're discovered
+          ];
+
+          const exploitable = [];
+
+          for (const [name, vuln] of Object.entries(audit.vulnerabilities || {})) {
+            if (vuln.severity === 'critical' || vuln.severity === 'high') {
+              for (const issue of vuln.via) {
+                if (typeof issue === 'object' && activelyExploited.includes(issue.source)) {
+                  exploitable.push({
+                    name: name,
+                    severity: vuln.severity,
+                    advisory: issue.url,
+                    title: issue.title
+                  });
+                }
+              }
+            }
+          }
+
+          console.log(JSON.stringify(exploitable, null, 2));
+          process.exit(exploitable.length > 0 ? 1 : 0);
+          EOF
+
+          node check-exploitable.js > exploitable.json || echo "has_exploitable=true" >> $GITHUB_OUTPUT
+
+      - name: Backup package files
+        run: |
+          cp package.json package.json.backup
+          cp package-lock.json package-lock.json.backup
+
+      - name: Attempt automatic fix (Critical & High)
+        id: fix_critical
+        run: |
+          echo "🔧 Attempting to fix CRITICAL and HIGH vulnerabilities..."
+
+          # Try npm audit fix first (non-breaking)
+          npm audit fix --audit-level=high 2>&1 | tee fix-log.txt || true
+
+          # Check if anything changed
+          if git diff --quiet package.json package-lock.json; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+            echo "No automatic fixes available for high/critical vulnerabilities"
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Successfully applied automatic fixes"
+          fi
+
+      - name: Attempt fixes with breaking changes (if needed)
+        id: fix_breaking
+        if: steps.audit.outputs.critical > 0 || steps.audit.outputs.high > 0
+        run: |
+          echo "⚠️ Attempting fixes with potential breaking changes..."
+
+          # Only for critical vulnerabilities, try force fix
+          if [ "${{ steps.audit.outputs.critical }}" -gt "0" ]; then
+            npm audit fix --force 2>&1 | tee fix-force-log.txt || true
+
+            if git diff --quiet package.json package-lock.json; then
+              echo "force_changed=false" >> $GITHUB_OUTPUT
+            else
+              echo "force_changed=true" >> $GITHUB_OUTPUT
+              echo "⚠️ Applied breaking changes to fix CRITICAL vulnerabilities"
+            fi
+          fi
+
+      - name: Run tests after fixes
+        id: test
+        if: steps.fix_critical.outputs.changed == 'true' || steps.fix_breaking.outputs.force_changed == 'true'
+        run: |
+          # Try to run tests if they exist
+          if npm run test --if-present; then
+            echo "tests_passed=true" >> $GITHUB_OUTPUT
+            echo "✅ Tests passed after security fixes"
+          else
+            echo "tests_passed=false" >> $GITHUB_OUTPUT
+            echo "❌ Tests failed after security fixes"
+
+            # Restore backup if tests fail
+            echo "🔄 Restoring backup due to test failures..."
+            mv package.json.backup package.json
+            mv package-lock.json.backup package-lock.json
+            npm ci
+
+            exit 1
+          fi
+
+      - name: Generate detailed report
+        if: always()
+        run: |
+          cat > SECURITY_FIX_REPORT.md << 'EOF'
+          # 🔒 Security Vulnerability Auto-Fix Report
+
+          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+          ## 📊 Vulnerability Summary
+
+          | Severity | Count |
+          |----------|-------|
+          | 🔴 Critical | ${{ steps.audit.outputs.critical }} |
+          | 🟠 High | ${{ steps.audit.outputs.high }} |
+          | 🟡 Moderate | ${{ steps.audit.outputs.moderate }} |
+          | ⚪ Low | ${{ steps.audit.outputs.low }} |
+          | **Total** | **${{ steps.audit.outputs.total }}** |
+
+          ## 🔧 Actions Taken
+
+          EOF
+
+          if [ "${{ steps.fix_critical.outputs.changed }}" == "true" ]; then
+            echo "✅ Applied automatic fixes for high/critical vulnerabilities" >> SECURITY_FIX_REPORT.md
+            echo "" >> SECURITY_FIX_REPORT.md
+            echo "### Changes Applied:" >> SECURITY_FIX_REPORT.md
+            echo '```' >> SECURITY_FIX_REPORT.md
+            cat fix-log.txt >> SECURITY_FIX_REPORT.md
+            echo '```' >> SECURITY_FIX_REPORT.md
+          else
+            echo "ℹ️ No automatic fixes available" >> SECURITY_FIX_REPORT.md
+          fi
+
+          if [ "${{ steps.fix_breaking.outputs.force_changed }}" == "true" ]; then
+            echo "" >> SECURITY_FIX_REPORT.md
+            echo "⚠️ Applied breaking changes for CRITICAL vulnerabilities" >> SECURITY_FIX_REPORT.md
+            echo "" >> SECURITY_FIX_REPORT.md
+            echo "### Breaking Changes:" >> SECURITY_FIX_REPORT.md
+            echo '```' >> SECURITY_FIX_REPORT.md
+            cat fix-force-log.txt >> SECURITY_FIX_REPORT.md
+            echo '```' >> SECURITY_FIX_REPORT.md
+          fi
+
+          echo "" >> SECURITY_FIX_REPORT.md
+          echo "## 🧪 Test Results" >> SECURITY_FIX_REPORT.md
+          if [ "${{ steps.test.outputs.tests_passed }}" == "true" ]; then
+            echo "✅ All tests passed" >> SECURITY_FIX_REPORT.md
+          elif [ "${{ steps.test.outputs.tests_passed }}" == "false" ]; then
+            echo "❌ Tests failed - changes were reverted" >> SECURITY_FIX_REPORT.md
+          else
+            echo "ℹ️ No tests were run" >> SECURITY_FIX_REPORT.md
+          fi
+
+          cat SECURITY_FIX_REPORT.md
+
+      - name: Create Pull Request
+        if: |
+          (steps.fix_critical.outputs.changed == 'true' || steps.fix_breaking.outputs.force_changed == 'true') &&
+          steps.test.outputs.tests_passed == 'true' &&
+          (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            🔒 Security: Auto-fix vulnerabilities (Critical: ${{ steps.audit.outputs.critical }}, High: ${{ steps.audit.outputs.high }})
+
+            Automatically fixed security vulnerabilities:
+            - Critical: ${{ steps.audit.outputs.critical }}
+            - High: ${{ steps.audit.outputs.high }}
+            - Moderate: ${{ steps.audit.outputs.moderate }}
+            - Low: ${{ steps.audit.outputs.low }}
+
+            Generated by automated security workflow.
+          branch: security/auto-fix-${{ github.run_number }}
+          delete-branch: true
+          title: '🔒 Security: Auto-fix vulnerabilities (Critical: ${{ steps.audit.outputs.critical }}, High: ${{ steps.audit.outputs.high }})'
+          body: |
+            ## 🔒 Automated Security Fix
+
+            This PR was automatically created to fix security vulnerabilities.
+
+            ${{ steps.audit.outputs.critical > 0 && '### ⚠️ CRITICAL VULNERABILITIES FOUND' || '' }}
+            ${{ steps.audit.outputs.high > 0 && '### ⚠️ HIGH VULNERABILITIES FOUND' || '' }}
+
+            ### 📊 Summary
+            - 🔴 Critical: ${{ steps.audit.outputs.critical }}
+            - 🟠 High: ${{ steps.audit.outputs.high }}
+            - 🟡 Moderate: ${{ steps.audit.outputs.moderate }}
+            - ⚪ Low: ${{ steps.audit.outputs.low }}
+
+            ### ✅ Verification
+            - [x] Automatic fixes applied
+            - [x] Tests passed
+            - [ ] Manual review required
+
+            ### 📝 Review Checklist
+            - [ ] Check for breaking changes in dependencies
+            - [ ] Verify all functionality works as expected
+            - [ ] Review SECURITY_FIX_REPORT.md for details
+
+            **Priority:** ${{ steps.audit.outputs.critical > 0 && '🔴 CRITICAL' || steps.audit.outputs.high > 0 && '🟠 HIGH' || '🟡 MODERATE' }}
+
+            ---
+
+            See [SECURITY_FIX_REPORT.md](./SECURITY_FIX_REPORT.md) for detailed information.
+
+            /cc @security-team
+          labels: |
+            security
+            dependencies
+            automated
+            ${{ steps.audit.outputs.critical > 0 && 'priority-critical' || '' }}
+            ${{ steps.audit.outputs.high > 0 && 'priority-high' || '' }}
+          assignees: ${{ github.repository_owner }}
+
+      - name: Create urgent issue for unfixable critical vulnerabilities
+        if: |
+          steps.audit.outputs.critical > 0 &&
+          steps.fix_critical.outputs.changed == 'false' &&
+          steps.fix_breaking.outputs.force_changed == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const audit = require('./audit-results.json');
+            let criticalVulns = [];
+
+            for (const [name, vuln] of Object.entries(audit.vulnerabilities || {})) {
+              if (vuln.severity === 'critical' && !vuln.fixAvailable) {
+                criticalVulns.push({
+                  name: name,
+                  range: vuln.range,
+                  via: vuln.via
+                });
+              }
+            }
+
+            if (criticalVulns.length > 0) {
+              const body = `## 🚨 CRITICAL: Unfixable Vulnerabilities Detected
+
+            **${{ steps.audit.outputs.critical }}** critical vulnerabilities were detected that **cannot be automatically fixed**.
+
+            ### Affected Packages:
+            ${criticalVulns.map(v => `- **${v.name}** (${v.range})`).join('\n')}
+
+            ### Required Actions:
+            1. **Immediate:** Review these vulnerabilities manually
+            2. **Consider:** Finding alternative packages
+            3. **Evaluate:** Risk vs. functionality trade-off
+            4. **Update:** Dependencies to compatible versions if available
+
+            ### Audit Details:
+            Run \`npm audit\` for full details.
+
+            **This requires immediate attention from the security team.**
+            `;
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 CRITICAL: Unfixable Security Vulnerabilities',
+                body: body,
+                labels: ['security', 'critical', 'needs-triage', 'priority-urgent']
+              });
+            }
+
+      - name: Upload audit results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-results
+          path: |
+            audit-results.json
+            SECURITY_FIX_REPORT.md
+            fix-log.txt
+            fix-force-log.txt
+            exploitable.json
+          retention-days: 90
+
+      - name: Post summary
+        if: always()
+        run: |
+          echo "## 🔒 Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| 🔴 Critical | ${{ steps.audit.outputs.critical }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟠 High | ${{ steps.audit.outputs.high }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| 🟡 Moderate | ${{ steps.audit.outputs.moderate }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| ⚪ Low | ${{ steps.audit.outputs.low }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.fix_critical.outputs.changed }}" == "true" ]; then
+            echo "✅ Automatic fixes were applied" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No automatic fixes available" >> $GITHUB_STEP_SUMMARY
+          fi

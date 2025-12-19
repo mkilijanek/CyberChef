@@ -1,0 +1,87 @@
+version: 2
+
+updates:
+  # NPM dependencies - Daily security updates
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "03:00"
+      timezone: "UTC"
+
+    # Security updates - always create PRs
+    open-pull-requests-limit: 10
+
+    # Grouping strategy
+    groups:
+      # Group all patch updates together
+      patch-updates:
+        patterns:
+          - "*"
+        update-types:
+          - "patch"
+
+      # Group security updates by severity
+      critical-security:
+        patterns:
+          - "*"
+        update-types:
+          - "security-update"
+
+      # Group development dependencies
+      dev-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+
+    # Labels for PRs
+    labels:
+      - "dependencies"
+      - "automated"
+      - "security"
+
+    # Assignees
+    assignees:
+      - "${{ github.repository_owner }}"
+
+    # Reviewers (customize as needed)
+    # reviewers:
+    #   - "security-team"
+
+    # Commit message configuration
+    commit-message:
+      prefix: "build(deps):"
+      prefix-development: "build(deps-dev):"
+      include: "scope"
+
+    # Pull request configuration
+    pull-request-branch-name:
+      separator: "-"
+
+    # Ignore specific dependencies (add as needed)
+    ignore:
+      # Example: ignore major version updates for stable packages
+      # - dependency-name: "package-name"
+      #   update-types: ["version-update:semver-major"]
+
+    # Allow automatic updates for specific dependencies
+    allow:
+      - dependency-type: "all"
+
+  # GitHub Actions - Weekly updates
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "03:00"
+      timezone: "UTC"
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+
+    commit-message:
+      prefix: "ci:"

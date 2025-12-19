@@ -114,7 +114,10 @@ GostRandom.prototype.getRandomValues = function (array) // <editor-fold defaults
         // Native window cryptographic interface
         rootCrypto.getRandomValues(u8);
     } else {
-        // Standard Javascript method
+        // Standard Javascript method - WARNING: Not cryptographically secure!
+        if (typeof console !== "undefined" && console.warn) {
+            console.warn("SECURITY WARNING: crypto.getRandomValues not available, falling back to Math.random() which is NOT cryptographically secure!");
+        }
         for (var i = 0, n = u8.length; i < n; i++)
             u8[i] = Math.floor(256 * Math.random()) & 255;
     }
