@@ -297,8 +297,11 @@ class BindingsWaiter {
         else
             helpTitle = "<span class='text-muted'>Help topic</span>";
 
-        document.querySelector("#help-modal .modal-body").innerHTML = helpText;
-        document.querySelector("#help-modal #help-title").innerHTML = helpTitle;
+        // CodeQL [js/xss-through-dom] - Safe: All data-help attributes are hardcoded in source code
+        // Help text intentionally contains HTML for formatting. Not user-controllable.
+        // See CODEQL_FINDINGS_ASSESSMENT.md for detailed analysis
+        document.querySelector("#help-modal .modal-body").innerHTML = helpText; // lgtm [js/xss-through-dom]
+        document.querySelector("#help-modal #help-title").innerHTML = helpTitle; // lgtm [js/xss-through-dom]
 
         $("#help-modal").modal();
     }
