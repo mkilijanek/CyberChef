@@ -15,7 +15,7 @@ jobs:
     - name: Set node version
       uses: actions/setup-node@v4
       with:
-        node-version: '18.x'
+        node-version: '22.x'
 
     - name: Install
       run: |

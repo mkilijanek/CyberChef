@@ -137,7 +137,7 @@ Comprehensive review of GitHub Actions workflows, Dependabot configuration, and 
 
 **Multi-stage Build:**
 1. **Stage 1: Builder**
-   - Base: `node:18-alpine`
+   - Base: `node:22-alpine`
    - Platform: `$BUILDPLATFORM` (build platform only)
    - Actions: npm ci, postinstall, build
    - Output: `/app/build/prod`
@@ -211,11 +211,11 @@ Comprehensive review of GitHub Actions workflows, Dependabot configuration, and 
 
 | Workflow | Node.js | checkout | setup-node | CodeQL | Purpose |
 |----------|---------|----------|------------|--------|---------|
-| master.yml | 18.x | @v4 ✅ | @v4 ✅ | - | Build & Deploy |
-| pull_requests.yml | 18.x | @v4 ✅ | @v4 ✅ | - | PR Validation |
-| releases.yml | 18.x | @v4 ✅ | @v4 ✅ | - | Release Automation |
-| security-auto-fix.yml | 18.x | @v4 ✅ | @v4 ✅ | - | Vulnerability Auto-Fix |
-| dependency-review.yml | 18.x | @v4 ✅ | - | - | PR Security Review |
+| master.yml | 22.x | @v4 ✅ | @v4 ✅ | - | Build & Deploy |
+| pull_requests.yml | 22.x | @v4 ✅ | @v4 ✅ | - | PR Validation |
+| releases.yml | 22.x | @v4 ✅ | @v4 ✅ | - | Release Automation |
+| security-auto-fix.yml | 22.x | @v4 ✅ | @v4 ✅ | - | Vulnerability Auto-Fix |
+| dependency-review.yml | 22.x | @v4 ✅ | - | - | PR Security Review |
 | codeql-analysis.yml | - | @v4 ✅ | - | @v3 ✅ | SAST Scanning |
 
 **Status:** ✅ FULLY CONSISTENT
