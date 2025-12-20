@@ -2,9 +2,22 @@ name: "Master Build, Test & Deploy"
 
 on:
   workflow_dispatch:
+    inputs:
+      nightly:
+        description: "Tag build as nightly"
+        required: false
+        default: "false"
   push:
     branches:
     - master
+  schedule:
+    # Weekly build and publish to keep images fresh
+    - cron: '0 3 * * 1'
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  PLATFORMS: linux/amd64,linux/arm64
 
 env:
   REGISTRY: ghcr.io
@@ -86,6 +99,14 @@ jobs:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    - name: Set extra tags
+      run: |
+        if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ github.event.inputs.nightly }}" = "true" ]; then
+          echo "EXTRA_TAGS=type=raw,value=nightly" >> $GITHUB_ENV
+        else
+          echo "EXTRA_TAGS=" >> $GITHUB_ENV
+        fi
+
     - name: Docker metadata
       id: meta
       uses: docker/metadata-action@v5
@@ -94,6 +115,7 @@ jobs:
         tags: |
           type=raw,value=latest
           type=sha,format=long
+          ${{ env.EXTRA_TAGS }}
 
     - name: Build and push multi-arch image
       uses: docker/build-push-action@v5
