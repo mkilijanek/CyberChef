@@ -1,8 +1,13 @@
 # Multi-platform Docker build and publish for CyberChef
 
-IMAGE_NAME ?= ghcr.io/gchq/cyberchef
+IMAGE_NAME ?= ghcr.io/mkilijanek/cyberchef
 PLATFORMS ?= linux/amd64,linux/arm64
 MONTHLY_TAG ?= $(shell date +%Y-%m)
+SBOM ?= false
+PROVENANCE ?= false
+
+SBOM_FLAG := $(if $(filter true,$(SBOM)),--sbom=true,)
+PROVENANCE_FLAG := $(if $(filter true,$(PROVENANCE)),--provenance=true,)
 
 .PHONY: check-branch build publish scan
 
@@ -26,14 +31,14 @@ build: check-branch
 publish: check-branch
 	docker buildx build \
 		--pull \
-		--platform $(PLATFORMS) \
-		--tag $(IMAGE_NAME):latest \
-		--tag $(IMAGE_NAME):$(MONTHLY_TAG) \
-		--sbom=true \
-		--provenance=true \
-		--push \
-		.
-	$(MAKE) scan
+                --platform $(PLATFORMS) \
+                --tag $(IMAGE_NAME):latest \
+                --tag $(IMAGE_NAME):$(MONTHLY_TAG) \
+                $(SBOM_FLAG) \
+                $(PROVENANCE_FLAG) \
+                --push \
+                .
+        $(MAKE) scan
 
 scan:
 	docker scout cves $(IMAGE_NAME):latest --only-severity critical,high || true
