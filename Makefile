@@ -21,7 +21,6 @@ build: check-branch
 		--tag $(IMAGE_NAME):$(MONTHLY_TAG) \
 		--sbom=true \
 		--provenance=true \
-		--output=type=docker \
 		.
 
 publish: check-branch
