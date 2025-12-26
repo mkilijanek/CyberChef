@@ -681,9 +681,9 @@ Documentation range: 2001:db8::/32`;
 
     it("Parse URI", () => {
         const result = chef.parseURI("https://www.google.co.uk/search?q=almonds");
-        const expected = `Protocol:	https:
-Hostname:	www.google.co.uk
-Path name:	/search
+        const expected = `Protocol:\thttps:
+Hostname:\twww.google.co.uk
+Path name:\t/search
 Arguments:
 \tq = almonds
 `;

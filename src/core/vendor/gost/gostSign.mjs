@@ -938,7 +938,7 @@ function expMod(x, e, m) {
             i += DB;
             --j;
         }
-        if (is1) {	// ret == 1, don't bother squaring or multiplying it
+        if (is1) {    // ret == 1, don't bother squaring or multiplying it
             copyTo(g[w], r);
             is1 = false;
         }

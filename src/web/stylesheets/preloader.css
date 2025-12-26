@@ -95,51 +95,51 @@
 }
 
 .loaded #rec-list li {
-	animation: bump 0.7s cubic-bezier(0.7, 0, 0.3, 1) both;
+    animation: bump 0.7s cubic-bezier(0.7, 0, 0.3, 1) both;
 }
 
 .loaded #content-wrapper {
-	animation-delay: 0.10s;
+    animation-delay: 0.10s;
 }
 
 .loaded #rec-list li:first-child {
-	animation-delay: 0.20s;
+    animation-delay: 0.20s;
 }
 
 .loaded #rec-list li:nth-child(2) {
-	animation-delay: 0.25s;
+    animation-delay: 0.25s;
 }
 
 .loaded #rec-list li:nth-child(3) {
-	animation-delay: 0.30s;
+    animation-delay: 0.30s;
 }
 
 .loaded #rec-list li:nth-child(4) {
-	animation-delay: 0.35s;
+    animation-delay: 0.35s;
 }
 
 .loaded #rec-list li:nth-child(5) {
-	animation-delay: 0.40s;
+    animation-delay: 0.40s;
 }
 
 .loaded #rec-list li:nth-child(6) {
-	animation-delay: 0.45s;
+    animation-delay: 0.45s;
 }
 
 .loaded #rec-list li:nth-child(7) {
-	animation-delay: 0.50s;
+    animation-delay: 0.50s;
 }
 
 .loaded #rec-list li:nth-child(8) {
-	animation-delay: 0.55s;
+    animation-delay: 0.55s;
 }
 
 .loaded #rec-list li:nth-child(9) {
-	animation-delay: 0.60s;
+    animation-delay: 0.60s;
 }
 
 .loaded #rec-list li:nth-child(10) {
-	animation-delay: 0.65s;
+    animation-delay: 0.65s;
 }
 
 
@@ -155,7 +155,7 @@
 }
 
 @keyframes bump {
-	from {
+    from {
         opacity: 0;
         transform: translate3d(0, 200px, 0);
     }

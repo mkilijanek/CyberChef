@@ -43,32 +43,32 @@ const OUT_CRL_PEM_RSA = `Certificate Revocation List (CRL):
         CN = Test Root CA
     Last Update: Sun, 25 Aug 2024 11:49:10 GMT
     Next Update: Tue, 24 Sep 2024 11:49:10 GMT
-	CRL extensions:
+\tCRL extensions:
         2.5.29.46:
-        	Unsupported CRL extension. Try openssl CLI.
+        \tUnsupported CRL extension. Try openssl CLI.
         X509v3 Authority Key Identifier:
-        	keyid:B8:C9:AD:FD:A8:50:54:D5:85:6E:34:8B:4C:60:2F:B0:49:B6:87:46
-        	DirName:/C=UK/ST=London/O=BB/CN=Test Root CA
-        	serial:37:5D:4B:F6:BD:7C:11:7C:CC:46:1A:FF:D7:2F:2C:26:F8:1E:4B:3D
+        \tkeyid:B8:C9:AD:FD:A8:50:54:D5:85:6E:34:8B:4C:60:2F:B0:49:B6:87:46
+        \tDirName:/C=UK/ST=London/O=BB/CN=Test Root CA
+        \tserial:37:5D:4B:F6:BD:7C:11:7C:CC:46:1A:FF:D7:2F:2C:26:F8:1E:4B:3D
         X509v3 CRL Distribution Points:
-        	Full Name:
-        		URI:http://example.com/full-crl
-        	Full Name:
-        		URI:ldap://example.com/full-crl
-        	Full Name:
-        		IP:127.0.0.1
+        \tFull Name:
+        \t\tURI:http://example.com/full-crl
+        \tFull Name:
+        \t\tURI:ldap://example.com/full-crl
+        \tFull Name:
+        \t\tIP:127.0.0.1
         X509v3 CRL Number:
-        	1E3C
+        \t1E3C
         issuerAltName:
-        	Unsupported CRL extension. Try openssl CLI.
+        \tUnsupported CRL extension. Try openssl CLI.
 Revoked Certificates:
     Serial Number: 1000
         Revocation Date: Sun, 25 Aug 2024 03:23:08 GMT
-    	CRL entry extensions:
+    \tCRL entry extensions:
             X509v3 CRL Reason Code:
                 Certificate Hold
             Hold Instruction Code:
-            	Hold Instruction Reject
+            \tHold Instruction Reject
 Signature Value:
         03:1b:2b:fb:d9:c4:2d:45:56:84:57:a4:c3:2e:86:b2:a1:fc:
         c4:e7:fa:12:a1:a3:45:a1:1d:5f:8f:56:98:1e:34:9b:65:5a:
@@ -135,32 +135,32 @@ const OUT_CRL_PEM_RSA_CRL_REASON_AND_INVALIDITY_DATE = `Certificate Revocation L
         CN = Test Root CA
     Last Update: Sun, 25 Aug 2024 12:08:56 GMT
     Next Update: Tue, 24 Sep 2024 12:08:56 GMT
-	CRL extensions:
+\tCRL extensions:
         2.5.29.46:
-        	Unsupported CRL extension. Try openssl CLI.
+        \tUnsupported CRL extension. Try openssl CLI.
         X509v3 Authority Key Identifier:
-        	keyid:B8:C9:AD:FD:A8:50:54:D5:85:6E:34:8B:4C:60:2F:B0:49:B6:87:46
-        	DirName:/C=UK/ST=London/O=BB/CN=Test Root CA
-        	serial:37:5D:4B:F6:BD:7C:11:7C:CC:46:1A:FF:D7:2F:2C:26:F8:1E:4B:3D
+        \tkeyid:B8:C9:AD:FD:A8:50:54:D5:85:6E:34:8B:4C:60:2F:B0:49:B6:87:46
+        \tDirName:/C=UK/ST=London/O=BB/CN=Test Root CA
+        \tserial:37:5D:4B:F6:BD:7C:11:7C:CC:46:1A:FF:D7:2F:2C:26:F8:1E:4B:3D
         X509v3 CRL Distribution Points:
-        	Full Name:
-        		URI:http://example.com/full-crl
-        	Full Name:
-        		URI:ldap://example.com/full-crl
-        	Full Name:
-        		IP:127.0.0.1
+        \tFull Name:
+        \t\tURI:http://example.com/full-crl
+        \tFull Name:
+        \t\tURI:ldap://example.com/full-crl
+        \tFull Name:
+        \t\tIP:127.0.0.1
         X509v3 CRL Number:
-        	1E3D
+        \t1E3D
         issuerAltName:
-        	Unsupported CRL extension. Try openssl CLI.
+        \tUnsupported CRL extension. Try openssl CLI.
 Revoked Certificates:
     Serial Number: 1000
         Revocation Date: Sun, 25 Aug 2024 12:08:48 GMT
-    	CRL entry extensions:
+    \tCRL entry extensions:
             X509v3 CRL Reason Code:
                 Key Compromise
             Invalidity Date:
-            	Sun, 25 Aug 2024 00:00:00 GMT
+            \tSun, 25 Aug 2024 00:00:00 GMT
 Signature Value:
         72:2e:9e:c9:59:09:81:d4:d8:65:2c:00:87:eb:31:4e:7b:7d:
         72:09:35:72:c4:94:2d:82:e8:ed:4a:b8:b5:2c:db:ba:23:0c:
@@ -231,13 +231,13 @@ const OUT_CRL_PEM_RSA_CRL_EXTENSIONS = `Certificate Revocation List (CRL):
         CN = Test Root CA
     Last Update: Sun, 25 Aug 2024 12:37:10 GMT
     Next Update: Tue, 24 Sep 2024 12:37:10 GMT
-	CRL extensions:
+\tCRL extensions:
         2.5.29.46:
-        	Unsupported CRL extension. Try openssl CLI.
+        \tUnsupported CRL extension. Try openssl CLI.
         X509v3 Authority Key Identifier:
-        	keyid:B8:C9:AD:FD:A8:50:54:D5:85:6E:34:8B:4C:60:2F:B0:49:B6:87:46
-        	DirName:/C=UK/ST=London/O=BB/CN=Test Root CA
-        	serial:37:5D:4B:F6:BD:7C:11:7C:CC:46:1A:FF:D7:2F:2C:26:F8:1E:4B:3D
+        \tkeyid:B8:C9:AD:FD:A8:50:54:D5:85:6E:34:8B:4C:60:2F:B0:49:B6:87:46
+        \tDirName:/C=UK/ST=London/O=BB/CN=Test Root CA
+        \tserial:37:5D:4B:F6:BD:7C:11:7C:CC:46:1A:FF:D7:2F:2C:26:F8:1E:4B:3D
         X509v3 CRL Distribution Points:
             Full Name:
                 URI:http://example.com/full-crl
@@ -246,7 +246,7 @@ const OUT_CRL_PEM_RSA_CRL_EXTENSIONS = `Certificate Revocation List (CRL):
             Full Name:
                 IP:127.0.0.1
         X509v3 CRL Number:
-        	1E42
+        \t1E42
         X509v3 Issuer Alternative Name:
             OtherName:1.2.3.4.5::CustomName
             EMAIL:ca@example.com
@@ -257,11 +257,11 @@ const OUT_CRL_PEM_RSA_CRL_EXTENSIONS = `Certificate Revocation List (CRL):
 Revoked Certificates:
     Serial Number: 1000
         Revocation Date: Sun, 25 Aug 2024 12:08:48 GMT
-    	CRL entry extensions:
+    \tCRL entry extensions:
             X509v3 CRL Reason Code:
                 Key Compromise
             Invalidity Date:
-            	Sun, 25 Aug 2024 00:00:00 GMT
+            \tSun, 25 Aug 2024 00:00:00 GMT
 Signature Value:
         5f:fd:2f:86:86:98:87:76:8a:0c:3b:f8:c7:c3:c6:89:1e:bc:
         82:64:25:7f:cc:92:61:e9:5c:19:75:6f:88:4b:f3:91:46:0f:

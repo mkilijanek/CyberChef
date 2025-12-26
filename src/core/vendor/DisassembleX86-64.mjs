@@ -3423,7 +3423,7 @@ export function CompatibilityMode( type )
   Operands[0x1A7] = "070E0B0E";
   
   //Adjust the VEX mask instructions for K1OM (Knights corner) which conflict with the enhanced AVX512 versions.
-	
+    
   if( type === 1 )
   {
     Mnemonics[0x141] = [["CMOVNO","KAND","",""],"","",""];
@@ -5239,7 +5239,7 @@ function DecodeOperands()
       X86Decoder[3].BySizeAttrubute, //By size attribute or not.
       X86Decoder[3].Size //Size settings.
     );
-	  
+      
     //Check if Instruction uses condition codes.
 
     if( Instruction.slice(-1) === "," )

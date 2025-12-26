@@ -2580,7 +2580,7 @@ export const FILE_SIGNATURES = {
         {
             name: "Smile",
             extension: "sml",
-            mime: "	application/x-jackson-smile",
+            mime: "    application/x-jackson-smile",
             description: "",
             signature: {
                 0: 0x3a,
