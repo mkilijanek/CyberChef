@@ -21,13 +21,12 @@ check-branch:
 build: check-branch
 	docker buildx build \
 		--pull \
-                --platform $(PLATFORMS) \
-                --tag $(IMAGE_NAME):latest \
-                --tag $(IMAGE_NAME):$(MONTHLY_TAG) \
-                $(SBOM_FLAG) \
-                $(PROVENANCE_FLAG) \
-                --output=type=docker \
-                .
+		--platform $(PLATFORMS) \
+		--tag $(IMAGE_NAME):latest \
+		--tag $(IMAGE_NAME):$(MONTHLY_TAG) \
+		--sbom=true \
+		--provenance=true \
+		.
 
 publish: check-branch
 	docker buildx build \
