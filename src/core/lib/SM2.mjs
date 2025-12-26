@@ -171,8 +171,8 @@ export class SM2 {
      */
     getBigRandom(limit) {
         return new r.BigInteger(limit.bitLength(), this.rng)
-	    .mod(limit.subtract(r.BigInteger.ONE))
-	    .add(r.BigInteger.ONE);
+        .mod(limit.subtract(r.BigInteger.ONE))
+        .add(r.BigInteger.ONE);
     }
 
     /**

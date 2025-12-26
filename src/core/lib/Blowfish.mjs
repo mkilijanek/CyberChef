@@ -45,10 +45,10 @@ import forge from "node-forge";
 
 const lang = {};
 lang.isString = function(it) {
-	// summary:
-	//		Return true if it is a String
-	// it: anything
-	//		Item to test.
+    // summary:
+    //        Return true if it is a String
+    // it: anything
+    //        Item to test.
     return (typeof it == "string" || it instanceof String); // Boolean
 };
 
@@ -57,29 +57,29 @@ lang.isString = function(it) {
 
 const arrayUtil = {};
 arrayUtil.map = function(arr, callback, thisObject, Ctr) {
-	// summary:
-	//		applies callback to each element of arr and returns
-	//		an Array with the results
-	// arr: Array|String
-	//		the array to iterate on. If a string, operates on
-	//		individual characters.
-	// callback: Function
-	//		a function is invoked with three arguments, (item, index,
-	//		array),	 and returns a value
-	// thisObject: Object?
-	//		may be used to scope the call to callback
-	// returns: Array
-	// description:
-	//		This function corresponds to the JavaScript 1.6 Array.map() method, with one difference: when
-	//		run over sparse arrays, this implementation passes the "holes" in the sparse array to
-	//		the callback function with a value of undefined. JavaScript 1.6's map skips the holes in the sparse array.
-	//		For more details, see:
-	//		https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/map
-	// example:
-	//	| // returns [2, 3, 4, 5]
-	//	| array.map([1, 2, 3, 4], function(item){ return item+1 });
+    // summary:
+    //        applies callback to each element of arr and returns
+    //        an Array with the results
+    // arr: Array|String
+    //        the array to iterate on. If a string, operates on
+    //        individual characters.
+    // callback: Function
+    //        a function is invoked with three arguments, (item, index,
+    //        array),     and returns a value
+    // thisObject: Object?
+    //        may be used to scope the call to callback
+    // returns: Array
+    // description:
+    //        This function corresponds to the JavaScript 1.6 Array.map() method, with one difference: when
+    //        run over sparse arrays, this implementation passes the "holes" in the sparse array to
+    //        the callback function with a value of undefined. JavaScript 1.6's map skips the holes in the sparse array.
+    //        For more details, see:
+    //        https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Objects/Array/map
+    // example:
+    //    | // returns [2, 3, 4, 5]
+    //    | array.map([1, 2, 3, 4], function(item){ return item+1 });
 
-	// TODO: why do we have a non-standard signature here? do we need "Ctr"?
+    // TODO: why do we have a non-standard signature here? do we need "Ctr"?
     let i = 0;
     const l = arr && arr.length || 0, out = new (Ctr || Array)(l);
     if (l && typeof arr == "string") arr = arr.split("");
@@ -97,10 +97,10 @@ arrayUtil.map = function(arr, callback, thisObject, Ctr) {
 
 /* dojo-release-1.8.1/dojox/encoding/crypto/Blowfish.js.uncompressed.js */
 
-/*	Blowfish
- *	Created based on the C# implementation by Marcus Hahn (http://www.hotpixel.net/)
- *	Unsigned math based on Paul Johnstone and Peter Wood patches.
- *	2005-12-08
+/*    Blowfish
+ *    Created based on the C# implementation by Marcus Hahn (http://www.hotpixel.net/)
+ *    Unsigned math based on Paul Johnstone and Peter Wood patches.
+ *    2005-12-08
  */
 const boxes={
     p: [
@@ -248,7 +248,7 @@ const boxes={
 
 
 ////////////////////////////////////////////////////////////////////////////
-//	fixes based on patch submitted by Peter Wood (#5791)
+//    fixes based on patch submitted by Peter Wood (#5791)
 const xor = function(x, y) {
     return (((x>>0x10)^(y>>0x10))<<0x10)|(((x&0xffff)^(y&0xffff))&0xffff);
 };
@@ -267,7 +267,7 @@ const f = function(v, box) {
 
 
 const eb = function(o, box) {
-	//	TODO: see if this can't be made more efficient
+    //    TODO: see if this can't be made more efficient
     let l=o.left;
     let r=o.right;
     l=xor(l, box.p[0]);
@@ -400,7 +400,7 @@ crypto.Blowfish.Algorithm.prototype.initialize=function(options) {
         });
     }
 
-	//	init the boxes
+    //    init the boxes
     let pos=0, data=0;
     const res={ left: 0, right: 0 };
     const box = {
@@ -417,7 +417,7 @@ crypto.Blowfish.Algorithm.prototype.initialize=function(options) {
         s3: boxes.s3.slice(0)
     };
 
-	//	encrypt p and the s boxes
+    //    encrypt p and the s boxes
     for (let i=0, l=box.p.length; i<l;) {
         eb(res, box);
         box.p[i++]=res.left;

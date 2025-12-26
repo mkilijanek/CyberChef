@@ -24,11 +24,11 @@ class IPv6TransitionAddresses extends Operation {
         this.inputType = "string";
         this.outputType = "string";
         this.args = [
-	    {
+        {
                 "name": "Ignore ranges",
                 "type": "boolean",
-	        "value": true
-	    },
+            "value": true
+        },
             {
                 "name": "Remove headers",
                 "type": "boolean",
@@ -46,29 +46,29 @@ class IPv6TransitionAddresses extends Operation {
         const XOR = {"0": "2", "1": "3", "2": "0", "3": "1", "4": "6", "5": "7", "6": "4", "7": "5", "8": "a", "9": "b", "a": "8", "b": "9", "c": "e", "d": "f", "e": "c", "f": "d"};
 
         /**
-	 * Function to convert to hex
-	 */
+     * Function to convert to hex
+     */
         function hexify(octet) {
             return Number(octet).toString(16).padStart(2, "0");
         }
 
         /**
-	 * Function to convert Hex to Int
-	 */
+     * Function to convert Hex to Int
+     */
         function intify(hex) {
             return parseInt(hex, 16);
         }
 
         /**
-	 * Function converts IPv4 to IPv6 Transtion address
-	 */
+     * Function converts IPv4 to IPv6 Transtion address
+     */
         function ipTransition(input, range) {
             let output = "";
             const HEXIP = input.split(".");
 
             /**
-	     * 6to4
-	     */
+         * 6to4
+         */
             if (!args[1]) {
                 output += "6to4: ";
             }
@@ -80,8 +80,8 @@ class IPv6TransitionAddresses extends Operation {
             }
 
             /**
-	     * Mapped
-	     */
+         * Mapped
+         */
             if (!args[1]) {
                 output += "IPv4 Mapped: ";
             }
@@ -93,8 +93,8 @@ class IPv6TransitionAddresses extends Operation {
             }
 
             /**
-	     * Translated
-	     */
+         * Translated
+         */
             if (!args[1]) {
                 output += "IPv4 Translated: ";
             }
@@ -106,8 +106,8 @@ class IPv6TransitionAddresses extends Operation {
             }
 
             /**
-	     * Nat64
-	     */
+         * Nat64
+         */
             if (!args[1]) {
                 output += "Nat 64: ";
             }
@@ -122,8 +122,8 @@ class IPv6TransitionAddresses extends Operation {
         }
 
         /**
-	 * Convert MAC to EUI-64
-	 */
+     * Convert MAC to EUI-64
+     */
         function macTransition(input) {
             let output = "";
             const MACPARTS = input.split(":");
@@ -138,33 +138,33 @@ class IPv6TransitionAddresses extends Operation {
 
 
         /**
-	 * Convert IPv6 address to its original IPv4 or MAC address
-	 */
+     * Convert IPv6 address to its original IPv4 or MAC address
+     */
         function unTransition(input) {
             let output = "";
             let hextets = "";
 
             /**
-	     * 6to4
-	     */
+         * 6to4
+         */
             if (input.startsWith("2002:")) {
                 if (!args[1]) {
                     output += "IPv4: ";
                 }
                 output += String(intify(input.slice(5, 7))) + "." + String(intify(input.slice(7, 9)))+ "." + String(intify(input.slice(10, 12)))+ "." + String(intify(input.slice(12, 14))) + "\n";
             } else if (input.startsWith("::ffff:") || input.startsWith("0000:0000:0000:0000:0000:ffff:") || input.startsWith("::ffff:0000:") || input.startsWith("0000:0000:0000:0000:ffff:0000:") || input.startsWith("64:ff9b::") || input.startsWith("0064:ff9b:0000:0000:0000:0000:")) {
-		/**
-		 * Mapped/Translated/Nat64
-		 */
+        /**
+         * Mapped/Translated/Nat64
+         */
                 hextets = /:([0-9a-z]{1,4}):[0-9a-z]{1,4}$/.exec(input)[1].padStart(4, "0") + /:([0-9a-z]{1,4})$/.exec(input)[1].padStart(4, "0");
                 if (!args[1]) {
                     output += "IPv4: ";
                 }
                 output += intify(hextets.slice(-8, -7) +  hextets.slice(-7, -6)) + "." +intify(hextets.slice(-6, -5) +  hextets.slice(-5, -4)) + "." +intify(hextets.slice(-4, -3) +  hextets.slice(-3, -2)) + "." +intify(hextets.slice(-2, -1) +  hextets.slice(-1,)) + "\n";
             } else if (input.slice(-12, -7).toUpperCase() === "FF:FE") {
-		/**
-		 * EUI-64
-		 */
+        /**
+         * EUI-64
+         */
                 if (!args[1]) {
                     output += "Mac Address: ";
                 }
@@ -177,8 +177,8 @@ class IPv6TransitionAddresses extends Operation {
 
 
         /**
-	 * Main
-	 */
+     * Main
+     */
         let output = "";
         let inputs = input.split("\n");
         // Remove blank rows

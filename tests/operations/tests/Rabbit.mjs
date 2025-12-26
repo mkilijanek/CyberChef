@@ -158,8 +158,8 @@ TestRegister.addTests([
         ]
     },
     {
-	// this testcase is taken from the first example on Crypto++ Wiki
-	// https://www.cryptopp.com/wiki/Rabbit
+    // this testcase is taken from the first example on Crypto++ Wiki
+    // https://www.cryptopp.com/wiki/Rabbit
         name: "Rabbit: little-endian mode (Crypto++ compatible)",
         input: "Rabbit stream cipher test",
         expectedOutput: "1ae2d4edcf9b6063b00fd6fda0b223aded157e77031cf0440b",
