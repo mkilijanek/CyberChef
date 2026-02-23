@@ -97,7 +97,6 @@
   },
   "dependencies": {
     "@astronautlabs/amf": "^0.0.6",
-    "@babel/polyfill": "^7.12.1",
     "@blu3r4y/lzma": "^2.3.3",
     "@wavesenterprise/crypto-gost-js": "^2.1.0-RC1",
     "@xmldom/xmldom": "^0.8.10",
@@ -200,7 +199,7 @@
     "testuidev": "npx nightwatch --env=dev",
     "lint": "npx grunt lint",
     "lint:grammar": "cspell ./src",
-    "postinstall": "npx grunt exec:fixCryptoApiImports && npx grunt exec:fixSnackbarMarkup && npx grunt exec:fixJimpModule",
+    "postinstall": "npx grunt exec:fixCryptoApiImports && npx grunt exec:fixSnackbarMarkup",
     "newop": "node src/core/config/scripts/newOperation.mjs",
     "minor": "node src/core/config/scripts/newMinorVersion.mjs",
     "tag": "git tag -s \"v$(npm pkg get version | xargs)\" -m \"$(npm pkg get version | xargs)\" && echo \"Created v$(npm pkg get version | xargs), now check and push the tag\"",
