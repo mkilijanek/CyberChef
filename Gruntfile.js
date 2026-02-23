@@ -29,7 +29,7 @@ module.exports = function (grunt) {
         "Creates a production-ready build. Use the --msg flag to add a compile message.",
         [
             "eslint", "clean:prod", "clean:config", "exec:generateConfig", "findModules", "webpack:web",
-            "copy:standalone", "zip:standalone", "clean:standalone", "exec:calcDownloadHash", "chmod"
+            "copy:standalone", "zip:standalone", "clean:standalone", "exec:calcDownloadHash", "exec:chmod"
         ]);
 
     grunt.registerTask("node",
@@ -78,7 +78,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks("grunt-contrib-clean");
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-contrib-watch");
-    grunt.loadNpmTasks("grunt-chmod");
     grunt.loadNpmTasks("grunt-exec");
     grunt.loadNpmTasks("grunt-concurrent");
     grunt.loadNpmTasks("grunt-contrib-connect");
@@ -307,14 +306,6 @@ module.exports = function (grunt) {
                 ]
             }
         },
-        chmod: {
-            build: {
-                options: {
-                    mode: "755",
-                },
-                src: ["build/**/*", "build/"]
-            }
-        },
         watch: {
             config: {
                 files: ["src/core/operations/**/*", "!src/core/operations/index.mjs"],
@@ -431,6 +422,11 @@ module.exports = function (grunt) {
                     }
                 },
                 stdout: false
+            },
+            chmod: {
+                command: process.platform === "win32"
+                    ? "echo Skipping chmod on Windows"
+                    : "chmod -R a+rX build/"
             },
         },
     });
