@@ -41,6 +41,19 @@ if (!fs.existsSync(target)) {
     process.exit(0);
 }
 
+// Guard against symlink attacks: verify the resolved path stays within node_modules
+const expectedBase = path.resolve(path.join(__dirname, '..', 'node_modules'));
+try {
+    const realTarget = fs.realpathSync.native(target);
+    if (!realTarget.startsWith(expectedBase + path.sep)) {
+        console.error('[fix-argon2-node24] Path escapes node_modules boundary — aborting.');
+        process.exit(1);
+    }
+} catch (e) {
+    console.error('[fix-argon2-node24] Could not resolve realpath — aborting.', e.message);
+    process.exit(1);
+}
+
 let src = fs.readFileSync(target, 'utf8');
 
 const OLD = '!isFileURI(wasmBinaryFile)&&typeof fetch';

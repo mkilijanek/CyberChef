@@ -210,13 +210,23 @@ export default ${moduleName};
 
     // console.log(template);
 
-    const filename = path.join(dir, `./${moduleName}.mjs`);
-    if (fs.existsSync(filename)) {
-        console.log(`${filename} already exists. It has NOT been overwritten.`.red);
-        console.log("Choose a different operation name to avoid conflicts.");
-        process.exit(0);
+    // Ensure the derived module name is a safe bare identifier with no path separators
+    if (!/^[A-Za-z][A-Za-z0-9]*$/.test(moduleName)) {
+        console.log("Could not derive a safe module name from the operation name.".red);
+        process.exit(1);
     }
-    fs.writeFileSync(filename, template);
+
+    const filename = path.join(dir, `${moduleName}.mjs`);
+    try {
+        fs.writeFileSync(filename, template, { flag: "wx" });
+    } catch (err) {
+        if (err.code === "EEXIST") {
+            console.log(`${filename} already exists. It has NOT been overwritten.`.red);
+            console.log("Choose a different operation name to avoid conflicts.");
+            process.exit(0);
+        }
+        throw err;
+    }
 
     console.log(`\nOperation template written to ${colors.green(filename)}`);
     console.log(`\nNext steps:

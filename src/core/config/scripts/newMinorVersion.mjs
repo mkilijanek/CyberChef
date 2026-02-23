@@ -61,9 +61,16 @@ async function main() {
 
     const features = [];
 
-    const commits = await (
-        await fetch(`https://api.github.com/repos/gchq/cyberchef/commits`)
-    ).json();
+    const controller = new AbortController();
+    const fetchTimer = setTimeout(() => controller.abort(), 30_000);
+    let commits;
+    try {
+        commits = await (
+            await fetch(`https://api.github.com/repos/gchq/cyberchef/commits`, { signal: controller.signal })
+        ).json();
+    } finally {
+        clearTimeout(fetchTimer);
+    }
     let foundLast = false;
     for (const commit of commits) {
         if (commit.sha === lastVersionSha) {
@@ -77,7 +84,8 @@ async function main() {
             };
 
             const msgparts = commit.commit.message.split("\n\n");
-            feature.message = msgparts[0];
+            // Sanitize: strip CRLF/LF from network data before writing to CHANGELOG
+            feature.message = msgparts[0].replace(/[\r\n]/g, " ").slice(0, 200);
             const prIdMatch = feature.message.match(/\(#(\d+)\)$/);
             if (prIdMatch !== null) {
                 feature.message = feature.message
