@@ -199,7 +199,7 @@
     "testuidev": "npx nightwatch --env=dev",
     "lint": "npx grunt lint",
     "lint:grammar": "cspell ./src",
-    "postinstall": "node scripts/fix-grunt-node24.js && npx grunt exec:fixCryptoApiImports && npx grunt exec:fixSnackbarMarkup",
+    "postinstall": "node scripts/fix-grunt-node24.js && node scripts/fix-argon2-node24.js && npx grunt exec:fixCryptoApiImports && npx grunt exec:fixSnackbarMarkup",
     "newop": "node src/core/config/scripts/newOperation.mjs",
     "minor": "node src/core/config/scripts/newMinorVersion.mjs",
     "tag": "git tag -s \"v$(npm pkg get version | xargs)\" -m \"$(npm pkg get version | xargs)\" && echo \"Created v$(npm pkg get version | xargs), now check and push the tag\"",
