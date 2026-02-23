@@ -45,6 +45,8 @@ self.postMessage({
  *     }
  * }
  */
+// Dedicated Web Worker — can only receive messages from its spawning page;
+// cross-origin postMessage to a dedicated worker is not possible. lgtm[js/missing-origin-check]
 self.addEventListener("message", function(e) {
     // Handle message
     const r = e.data;

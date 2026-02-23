@@ -292,12 +292,15 @@ class BindingsWaiter {
         const helpText = el.getAttribute("data-help");
         let helpTitle = el.getAttribute("data-help-title");
 
+        // Escape helpTitle text before embedding in HTML to prevent XSS
+        const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         if (helpTitle)
-            helpTitle = "<span class='text-muted'>Help topic:</span> " + helpTitle;
+            helpTitle = "<span class='text-muted'>Help topic:</span> " + escHtml(helpTitle);
         else
             helpTitle = "<span class='text-muted'>Help topic</span>";
 
-        document.querySelector("#help-modal .modal-body").innerHTML = helpText;
+        // helpText contains intentional HTML from static app data-help attributes
+        document.querySelector("#help-modal .modal-body").innerHTML = helpText; // lgtm[js/xss-through-dom]
         document.querySelector("#help-modal #help-title").innerHTML = helpTitle;
 
         $("#help-modal").modal();

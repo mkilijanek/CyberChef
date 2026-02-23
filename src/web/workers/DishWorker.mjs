@@ -18,6 +18,8 @@ loglevelMessagePrefix(log, {
     staticPrefixes: ["DishWorker"]
 });
 
+// Dedicated Web Worker — can only receive messages from its spawning page;
+// cross-origin postMessage to a dedicated worker is not possible. lgtm[js/missing-origin-check]
 self.addEventListener("message", function(e) {
     // Handle message from the main thread
     const r = e.data;

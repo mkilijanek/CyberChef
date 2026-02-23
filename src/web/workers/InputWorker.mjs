@@ -50,6 +50,8 @@ self.loadingInputs = 0;
  *
  * @param {MessageEvent} e
  */
+// Dedicated Web Worker — can only receive messages from its spawning page;
+// cross-origin postMessage to a dedicated worker is not possible. lgtm[js/missing-origin-check]
 self.addEventListener("message", function(e) {
     const r = e.data;
     if (!("action" in r)) {
@@ -780,6 +782,11 @@ self.addInput = function(
             log.error(`Invalid input type '${type}'.`);
             return -1;
     }
+    // Validate inputNum is a safe non-negative integer before using as object key
+    if (!Number.isInteger(inputNum) || inputNum < 0) {
+        log.error(`Invalid inputNum: ${inputNum}`);
+        return -1;
+    }
     self.inputs[inputNum] = newInputObj;
 
     // Tell the inputWaiter we've added an input, so it can create a tab to display it
@@ -824,7 +831,10 @@ self.removeInput = function(removeInputData) {
         }
     }
 
-    delete self.inputs[inputNum];
+    // Validate inputNum before use as object key to prevent property injection
+    if (Number.isInteger(inputNum) && inputNum >= 0) {
+        delete self.inputs[inputNum];
+    }
 
     if (refreshTabs) {
         self.refreshTabs(self.getPreviousInputNum(inputNum), "left");

@@ -1155,14 +1155,18 @@ class Utils {
         }
 
         const params = paramStr.split("&");
-        const result = {};
+        // Use a null-prototype object to prevent prototype pollution via crafted keys
+        const result = Object.create(null);
 
         for (let i = 0; i < params.length; i++) {
             const param = params[i].split("=");
+            const key = param.length !== 2 ? params[i] : param[0];
+            // Discard keys that would shadow Object prototype properties
+            if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
             if (param.length !== 2) {
-                result[params[i]] = true;
+                result[key] = true;
             } else {
-                result[param[0]] = decodeURIComponent(param[1].replace(/\+/g, " "));
+                result[key] = decodeURIComponent(param[1].replace(/\+/g, " "));
             }
         }
 
