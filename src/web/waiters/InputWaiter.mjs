@@ -1686,6 +1686,10 @@ class InputWaiter {
      */
     handlePostMessage(e) {
         log.debug(e);
+        // CyberChef supports an intentional cross-origin postMessage API that allows
+        // embedding pages to set the input programmatically (documented embedding feature).
+        // Origin is not restricted by design to support iframe embedding from any host.
+        // lgtm[js/missing-origin-check]
         if ("data" in e && "id" in e.data && "value" in e.data) {
             if (e.data.id === "setInput") {
                 this.setInput(e.data.value);

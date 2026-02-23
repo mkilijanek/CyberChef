@@ -292,16 +292,19 @@ class BindingsWaiter {
         const helpText = el.getAttribute("data-help");
         let helpTitle = el.getAttribute("data-help-title");
 
+        // Escape helpTitle text before embedding in HTML to prevent XSS
+        const escHtml = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
         if (helpTitle)
-            helpTitle = "<span class='text-muted'>Help topic:</span> " + helpTitle;
+            helpTitle = "<span class='text-muted'>Help topic:</span> " + escHtml(helpTitle);
         else
             helpTitle = "<span class='text-muted'>Help topic</span>";
 
-        // CodeQL [js/xss-through-dom] - Safe: All data-help attributes are hardcoded in source code
+        // CodeQL [js/xss-through-dom] - Safe: All data-help attributes are hardcoded in source code.
         // Help text intentionally contains HTML for formatting. Not user-controllable.
-        // See CODEQL_FINDINGS_ASSESSMENT.md for detailed analysis
-        document.querySelector("#help-modal .modal-body").innerHTML = helpText; // lgtm [js/xss-through-dom]
-        document.querySelector("#help-modal #help-title").innerHTML = helpTitle; // lgtm [js/xss-through-dom]
+        // See CODEQL_FINDINGS_ASSESSMENT.md for detailed analysis. lgtm[js/xss-through-dom]
+        document.querySelector("#help-modal .modal-body").innerHTML = helpText;
+        // helpTitle is now escaped via escHtml() above before insertion
+        document.querySelector("#help-modal #help-title").innerHTML = helpTitle;
 
         $("#help-modal").modal();
     }
