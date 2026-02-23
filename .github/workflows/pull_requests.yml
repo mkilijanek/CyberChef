@@ -11,6 +11,8 @@ on:
 jobs:
   main:
     runs-on: ubuntu-latest
+    env:
+      NODE_OPTIONS: --max_old_space_size=2048
     steps:
       - uses: actions/checkout@v4
 
@@ -24,7 +26,6 @@ jobs:
         run: |
           export DETECT_CHROMEDRIVER_VERSION=true
           npm install
-          echo "NODE_OPTIONS=--max_old_space_size=2048" >> $GITHUB_ENV
 
       - name: Lint
         run: npx grunt lint
