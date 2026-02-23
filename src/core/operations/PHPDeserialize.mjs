@@ -151,7 +151,7 @@ class PHPDeserialize extends Operation {
                     const value = read(length);
                     expect('";');
                     if (args[0]) {
-                        return '"' + value.replace(/"/g, '\\"') + '"'; // lgtm [js/incomplete-sanitization]
+                        return '"' + value.replace(/\\/g, "\\\\").replace(/"/g, '\\"') + '"';
                     } else {
                         return '"' + value + '"';
                     }

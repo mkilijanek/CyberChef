@@ -4,6 +4,8 @@
  * @license Apache-2.0
  */
 
+import DOMPurify from "dompurify";
+
 /**
  * Waiter to handle keybindings to CyberChef functions (i.e. Bake, Step, Save, Load etc.)
  */
@@ -299,9 +301,10 @@ class BindingsWaiter {
         else
             helpTitle = "<span class='text-muted'>Help topic</span>";
 
-        // helpText contains intentional HTML from static app data-help attributes
-        document.querySelector("#help-modal .modal-body").innerHTML = helpText; // lgtm[js/xss-through-dom]
-        document.querySelector("#help-modal #help-title").innerHTML = helpTitle;
+        // helpText contains intentional HTML from static app data-help attributes.
+        // DOMPurify strips any injected scripts while preserving formatting markup.
+        document.querySelector("#help-modal .modal-body").innerHTML = DOMPurify.sanitize(helpText);
+        document.querySelector("#help-modal #help-title").innerHTML = DOMPurify.sanitize(helpTitle);
 
         $("#help-modal").modal();
     }

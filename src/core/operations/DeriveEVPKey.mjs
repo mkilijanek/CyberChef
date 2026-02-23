@@ -7,6 +7,7 @@
 import Operation from "../Operation.mjs";
 import Utils from "../Utils.mjs";
 import CryptoJS from "crypto-js";
+import OperationError from "../errors/OperationError.mjs";
 
 /**
  * Derive EVP key operation
@@ -40,7 +41,7 @@ class DeriveEVPKey extends Operation {
             {
                 "name": "Iterations",
                 "type": "number",
-                "value": 1
+                "value": 1000
             },
             {
                 "name": "Hashing function",
@@ -62,10 +63,13 @@ class DeriveEVPKey extends Operation {
      * @returns {string}
      */
     run(input, args) {
+        const iterations = args[2];
+        if (!Number.isInteger(iterations) || iterations < 1)
+            throw new OperationError("Iterations must be a positive integer.");
+
         const passphrase = CryptoJS.enc.Latin1.parse(
                 Utils.convertToByteString(args[0].string, args[0].option)),
             keySize = args[1] / 32,
-            iterations = args[2],
             hasher = args[3],
             salt = CryptoJS.enc.Latin1.parse(
                 Utils.convertToByteString(args[4].string, args[4].option)),

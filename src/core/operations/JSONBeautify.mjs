@@ -160,7 +160,7 @@ function json2html(json, options) {
         json = Utils.escapeHtml(json);
 
         if (options.withLinks && isUrl(json)) {
-            html += `<a href="${json}" class="json-string" target="_blank">${json}</a>`;
+            html += `<a href="${json}" class="json-string" target="_blank" rel="noopener noreferrer">${json}</a>`;
         } else {
             // Escape double quotes in the rendered non-URL string.
             json = json.replace(/&quot;/g, "\\&quot;");

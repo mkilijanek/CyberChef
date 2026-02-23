@@ -1163,6 +1163,8 @@ class Utils {
             const key = param.length !== 2 ? params[i] : param[0];
             // Discard keys that would shadow Object prototype properties
             if (key === "__proto__" || key === "constructor" || key === "prototype") continue;
+            // Allowlist: skip keys with unusual characters to prevent property injection
+            if (!/^[a-zA-Z0-9._~:@!$&'()*+,;%=\- ]{1,256}$/.test(key)) continue;
             if (param.length !== 2) {
                 result[key] = true;
             } else {
