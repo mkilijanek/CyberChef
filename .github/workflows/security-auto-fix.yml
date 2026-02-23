@@ -17,14 +17,6 @@ on:
         required: false
         default: 'true'
 
-  # Run on push to main for testing
-  push:
-    branches:
-      - main
-    paths:
-      - 'package.json'
-      - 'package-lock.json'
-
 permissions:
   contents: write
   pull-requests: write
@@ -145,27 +137,9 @@ jobs:
             echo "✅ Successfully applied automatic fixes"
           fi
 
-      - name: Attempt fixes with breaking changes (if needed)
-        id: fix_breaking
-        if: steps.audit.outputs.critical > 0 || steps.audit.outputs.high > 0
-        run: |
-          echo "⚠️ Attempting fixes with potential breaking changes..."
-
-          # Only for critical vulnerabilities, try force fix
-          if [ "${{ steps.audit.outputs.critical }}" -gt "0" ]; then
-            npm audit fix --force 2>&1 | tee fix-force-log.txt || true
-
-            if git diff --quiet package.json package-lock.json; then
-              echo "force_changed=false" >> $GITHUB_OUTPUT
-            else
-              echo "force_changed=true" >> $GITHUB_OUTPUT
-              echo "⚠️ Applied breaking changes to fix CRITICAL vulnerabilities"
-            fi
-          fi
-
       - name: Run tests after fixes
         id: test
-        if: steps.fix_critical.outputs.changed == 'true' || steps.fix_breaking.outputs.force_changed == 'true'
+        if: steps.fix_critical.outputs.changed == 'true'
         run: |
           # Try to run tests if they exist
           if npm run test --if-present; then
@@ -218,16 +192,6 @@ jobs:
             echo "ℹ️ No automatic fixes available" >> SECURITY_FIX_REPORT.md
           fi
 
-          if [ "${{ steps.fix_breaking.outputs.force_changed }}" == "true" ]; then
-            echo "" >> SECURITY_FIX_REPORT.md
-            echo "⚠️ Applied breaking changes for CRITICAL vulnerabilities" >> SECURITY_FIX_REPORT.md
-            echo "" >> SECURITY_FIX_REPORT.md
-            echo "### Breaking Changes:" >> SECURITY_FIX_REPORT.md
-            echo '```' >> SECURITY_FIX_REPORT.md
-            cat fix-force-log.txt >> SECURITY_FIX_REPORT.md
-            echo '```' >> SECURITY_FIX_REPORT.md
-          fi
-
           echo "" >> SECURITY_FIX_REPORT.md
           echo "## 🧪 Test Results" >> SECURITY_FIX_REPORT.md
           if [ "${{ steps.test.outputs.tests_passed }}" == "true" ]; then
@@ -242,7 +206,7 @@ jobs:
 
       - name: Create Pull Request
         if: |
-          (steps.fix_critical.outputs.changed == 'true' || steps.fix_breaking.outputs.force_changed == 'true') &&
+          steps.fix_critical.outputs.changed == 'true' &&
           steps.test.outputs.tests_passed == 'true' &&
           (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
         uses: peter-evans/create-pull-request@v6
@@ -303,8 +267,7 @@ jobs:
       - name: Create urgent issue for unfixable critical vulnerabilities
         if: |
           steps.audit.outputs.critical > 0 &&
-          steps.fix_critical.outputs.changed == 'false' &&
-          steps.fix_breaking.outputs.force_changed == 'false'
+          steps.fix_critical.outputs.changed == 'false'
         uses: actions/github-script@v7
         with:
           script: |
@@ -359,7 +322,6 @@ jobs:
             audit-results.json
             SECURITY_FIX_REPORT.md
             fix-log.txt
-            fix-force-log.txt
             exploitable.json
           retention-days: 90
 
