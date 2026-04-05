@@ -28,7 +28,7 @@ class FromDecimal extends Operation {
             {
                 "name": "Delimiter",
                 "type": "option",
-                "value": DELIM_OPTIONS
+                "value": ["Auto"].concat(DELIM_OPTIONS)
             },
             {
                 "name": "Support signed values",

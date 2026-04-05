@@ -34,7 +34,7 @@ TestRegister.addTests([
     {
         name: "Text Encoding Brute Force - Decode preserves raw UTF-8 bytes",
         input: "63 61 66 c3 a9",
-        expectedMatch: /UTF-8 Unicode \(65001\).{1,10}café/,
+        expectedMatch: /UTF-8 \(65001\).{1,10}café/,
         recipeConfig: [
             {
                 op: "From Hex",
@@ -47,4 +47,3 @@ TestRegister.addTests([
         ],
     }
 ]);
-
