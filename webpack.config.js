@@ -227,7 +227,7 @@ module.exports = {
         ]
     },
     stats: {
-        children: false,
+        children: true,
         chunks: false,
         modules: false,
         entrypoints: false
