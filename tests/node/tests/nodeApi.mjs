@@ -175,6 +175,21 @@ TestRegister.addApiTests([
         assert(result instanceof NodeDish);
     }),
 
+    it("chef.bake: should support async operations in recipes", async () => {
+        const result = await chef.bake("Test", [
+            {
+                op: "Bcrypt",
+                args: [4]
+            },
+            {
+                op: "To Hex",
+                args: ["Space", 0]
+            }
+        ]);
+        assert(result instanceof NodeDish);
+        assert.match(result.toString(), /^24 32 61 24/);
+    }),
+
     it("chef.bake: should take an input and an op name and perform it", () => {
         const result = chef.bake("some input", "to base 32");
         assert.strictEqual(result.toString(), "ONXW2ZJANFXHA5LU");
