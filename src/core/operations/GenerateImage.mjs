@@ -164,7 +164,7 @@ class GenerateImage extends Operation {
 
         try {
             const imageBuffer = await image.getBuffer(JimpMime.png);
-            return imageBuffer.buffer;
+            return Utils.viewToArrayBuffer(imageBuffer);
         } catch (err) {
             throw new OperationError(`Error generating image. (${err})`);
         }
