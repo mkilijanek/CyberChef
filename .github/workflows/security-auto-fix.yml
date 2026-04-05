@@ -268,7 +268,7 @@ jobs:
         if: |
           steps.audit.outputs.critical > 0 &&
           steps.fix_critical.outputs.changed == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const audit = require('./audit-results.json');
