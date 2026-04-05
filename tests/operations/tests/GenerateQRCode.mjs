@@ -11,15 +11,15 @@ TestRegister.addTests([
     {
         name: "Generate QR Code : PNG",
         input: "Hello world!",
-        expectedOutput: "89 50 4e 47 0d 0a 1a 0a 00 00 00 0d 49 48 44 52 00 00 00 91 00 00 00 91 08 00 00 00 00 e6 b3 05 ff 00 00 01 1a 49 44 41 54 78 da ed da 41 12 83 20 0c 05 50 ef 7f e9 76 dd 05 f4 47 6c c4 ce 63 e5 8c 0c be 4d 24 24 1c af dd c6 41 44 44 44 44 44 44 44 44 44 f4 9f a2 e3 fb 98 cf 2b ad 42 44 d4 2a 1a 07 c3 e7 37 83 a7 d2 37 88 88 1a 44 c3 18 1a 46 e7 ca 2a 44 44 7b 88 4a f3 88 88 1e 23 9a ef 09 44 44 fb 8a 82 b7 c3 3c fe 8e 8c 8d 88 e8 b2 33 6d ba b3 f4 9d b2 89 88 16 eb 90 f3 a5 ef a8 8c 12 11 55 f3 a3 61 a2 93 e6 4c c3 45 89 88 ba 44 a5 e4 e7 64 5d 9d 88 a8 5f 14 74 82 d2 8a 64 5a b4 24 22 6a 10 a5 2d cf 79 3f e9 6c 53 89 88 e8 a7 a2 79 4f a8 b4 b3 ac 57 6b 88 88 ae 15 a5 de b9 bc 14 70 44 44 3f 13 ad d4 21 03 ea d9 6a 0d 11 d1 15 a2 e0 ff 5f 47 07 36 22 a2 06 d1 4a d2 1f 1c 94 89 88 b6 14 95 ee d5 12 11 3d 50 14 74 8c 82 70 24 22 ea 12 05 6f d3 4b 2c 4b d5 1a 22 a2 cb 44 2b 69 7d e9 5e 00 11 51 97 e8 d6 41 44 44 44 44 44 44 44 44 44 f4 7c d1 1b 1c 52 72 cb 26 c8 c7 0b 00 00 00 00 49 45 4e 44 ae 42 60 82",
+        expectedOutput: "Hello world!",
         recipeConfig: [
             {
                 "op": "Generate QR Code",
                 "args": ["PNG", 5, 4, "Medium"]
             },
             {
-                "op": "To Hex",
-                "args": ["Space", 0]
+                "op": "Parse QR Code",
+                "args": [false]
             }
         ],
     },

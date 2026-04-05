@@ -53,7 +53,7 @@ class TextEncodingBruteForce extends Operation {
         const output = {},
             charsets = Object.keys(CHR_ENC_CODE_PAGES),
             mode = args[0],
-            stringInput = Utils.arrayBufferToStr(input);
+            stringInput = Utils.byteArrayToUtf8(input);
 
         charsets.forEach(charset => {
             try {
