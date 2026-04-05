@@ -31,14 +31,8 @@ jobs:
           # Allow only specific licenses
           allow-licenses: Apache-2.0, MIT, BSD-2-Clause, BSD-3-Clause, ISC, CC0-1.0
 
-          # Deny GPL and other copyleft licenses
-          deny-licenses: GPL-2.0, GPL-3.0, LGPL-2.0, LGPL-2.1, LGPL-3.0, AGPL-3.0
-
           # Create comment on PR with results
           comment-summary-in-pr: always
-
-          # Fail on GHSA advisories
-          fail-on-ghsa: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
