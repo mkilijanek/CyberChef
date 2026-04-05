@@ -56,6 +56,7 @@ function bake(browser) {
         .expect.element("#bake span").text.to.equal("BAKE!");
 
     browser
+        .waitForElementNotVisible("#snackbar-container", 6000)
         .click("#bake")
         .waitForElementNotVisible("#stale-indicator", 5000)
         .waitForElementNotVisible("#output-loader", 5000);
