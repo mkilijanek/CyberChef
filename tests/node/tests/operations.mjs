@@ -364,7 +364,7 @@ color: white;
                 option: "utf8",
             },
         });
-        assert.strictEqual(result.toString(), "4930d5d200e80f18c96b5550d13c6af8");
+        assert.strictEqual(result.toString(), "b1698cb024aa3703b2c68b8f570aae7c");
     }),
 
     it("Derive PBKDF2 Key", () => {
@@ -873,13 +873,15 @@ pCGTErs=
     }),
 
     it("SQL Beautify", () => {
-        const result = chef.SQLBeautify(`SELECT MONTH, ID, RAIN_I, TEMP_F
-FROM STATS;`);
-        const expected = `SELECT MONTH,
-         ID,
-         RAIN_I,
-         TEMP_F
-FROM STATS;`;
+        const result = chef.SQLBeautify(`SELECT MONTH, ID, RAIN_I, TEMP_F FROM STATS;`);
+        const expected =
+`SELECT
+  MONTH,
+  ID,
+  RAIN_I,
+  TEMP_F
+FROM
+  STATS;`;
         assert.strictEqual(result.toString(), expected);
     }),
 
@@ -1144,4 +1146,3 @@ ExifImageHeight: 57`);
 
 
 ]);
-

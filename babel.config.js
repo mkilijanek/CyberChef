@@ -10,7 +10,6 @@ module.exports = function(api) {
             }]
         ],
         "plugins": [
-            "dynamic-import-node",
             "@babel/plugin-syntax-import-attributes",
             [
                 "@babel/plugin-transform-runtime", {
