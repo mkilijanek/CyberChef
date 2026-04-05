@@ -423,11 +423,11 @@ module.exports = function (grunt) {
                 },
                 stdout: false
             },
-            chmod: {
-                command: process.platform === "win32"
-                    ? "echo Skipping chmod on Windows"
-                    : "chmod -R a+rX build/"
-            },
+                chmod: {
+                    command: process.platform === "win32" ?
+                        "echo Skipping chmod on Windows" :
+                        "chmod -R a+rX build/"
+                },
         },
     });
 };
