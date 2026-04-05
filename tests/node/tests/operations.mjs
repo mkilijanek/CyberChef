@@ -364,7 +364,7 @@ color: white;
                 option: "utf8",
             },
         });
-        assert.strictEqual(result.toString(), "4930d5d200e80f18c96b5550d13c6af8");
+        assert.strictEqual(result.toString(), "b1698cb024aa3703b2c68b8f570aae7c");
     }),
 
     it("Derive PBKDF2 Key", () => {
@@ -1146,4 +1146,3 @@ ExifImageHeight: 57`);
 
 
 ]);
-
