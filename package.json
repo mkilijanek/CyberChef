@@ -52,7 +52,6 @@
     "@codemirror/view": "^6.41.0",
     "autoprefixer": "^10.4.27",
     "babel-loader": "^10.1.1",
-    "babel-plugin-transform-builtin-extend": "1.1.2",
     "base64-loader": "^1.0.0",
     "chromedriver": "^146.0.6",
     "cli-progress": "^3.12.0",
@@ -138,7 +137,7 @@
     "highlight.js": "^11.11.1",
     "ieee754": "^1.2.1",
     "jimp": "^1.6.0",
-    "jq-web": "^0.5.1",
+    "jq-web": "^0.6.2",
     "jquery": "3.7.1",
     "js-sha3": "^0.9.3",
     "jsesc": "^3.1.0",
@@ -192,10 +191,6 @@
     "xregexp": "^5.1.2",
     "zlibjs": "^0.3.1"
   },
-  "overrides": {
-    "pbkdf2": "^3.1.5",
-    "sha.js": "^2.4.12"
-  },
   "scripts": {
     "start": "npx grunt dev",
     "build": "npx grunt prod",
@@ -221,9 +216,23 @@
     "security:check": "npm run security:triage && npm run lint"
   },
   "overrides": {
+    "globule": {
+      "minimatch": "^3.1.5"
+    },
+    "lodash": "^4.18.1",
+    "grunt": {
+      "minimatch": "^3.1.5"
+    },
+    "minimatch@^3.0.0": {
+      "brace-expansion": "^1.1.13"
+    },
+    "path-to-regexp": "^0.1.13",
     "pbkdf2": "^3.1.5",
+    "qs": "^6.15.0",
+    "serialize-javascript": "^7.0.5",
     "sha.js": "^2.4.12",
-    "qs": "^6.15.0"
+    "shelljs": "^0.8.5",
+    "yaml": "^2.8.3"
   },
   "engines": {
     "node": ">=24"
