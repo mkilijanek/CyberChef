@@ -1,5 +1,9 @@
 "use strict";
 
+if (typeof globalThis.crypto === "undefined") {
+    globalThis.crypto = require("node:crypto").webcrypto;
+}
+
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
