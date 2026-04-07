@@ -44,12 +44,19 @@ class Jq extends Operation {
      * @param {Object[]} args
      * @returns {string}
      */
-    run(input, args) {
+    async run(input, args) {
         const [query, raw] = args;
         let result;
 
         try {
-            result = jq.json(input, query);
+            const jqModule = await jq,
+                jqJson = jqModule?.json;
+
+            if (typeof jqJson !== "function") {
+                throw new Error("jq runtime did not expose a json() function");
+            }
+
+            result = jqJson(input, query);
         } catch (err) {
             throw new OperationError(`Invalid jq expression: ${err.message}`);
         }
