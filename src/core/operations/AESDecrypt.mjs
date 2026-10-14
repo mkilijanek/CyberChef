@@ -8,7 +8,7 @@ import Operation from "../Operation.mjs";
 import Utils from "../Utils.mjs";
 import forge from "node-forge";
 import OperationError from "../errors/OperationError.mjs";
-import { getAESAlgorithm } from "../lib/AES.mjs";
+import { getAESAlgorithm, getAESIV } from "../lib/AES.mjs";
 
 /**
  * AES Decrypt operation
@@ -186,7 +186,7 @@ The following algorithms will be used based on the size of the key:
         }
 
         decipher.start({
-            iv: iv.length === 0 ? "" : iv,
+            iv: getAESIV(iv, mode),
             tag: mode === "GCM" ? gcmTag : undefined,
             additionalData: mode === "GCM" ? aad : undefined
         });

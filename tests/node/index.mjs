@@ -22,14 +22,17 @@ import "./tests/PGP.mjs";
 import "./tests/File.mjs";
 import "./tests/Dish.mjs";
 import "./tests/Operation.mjs";
+import "./tests/Magic.mjs";
 import "./tests/NodeDish.mjs";
 import "./tests/Utils.mjs";
 import "./tests/Categories.mjs";
 import "./tests/ToHTMLEntity.mjs";
 import "./tests/lib/BigIntUtils.mjs";
+import "./tests/lib/Magic.mjs";
 import "./tests/lib/ChartsProtocolPrototypePollution.mjs";
 import "./tests/lib/CryptoBrowserify.mjs";
 import "./tests/ParseQRCode.mjs";
+import "./tests/DisassembleX86.mjs";
 
 const testStatus = {
     allTestsPassing: true,

@@ -45,10 +45,15 @@ class Magic {
                 (inputEntropy < check.entropyRange[0] ||
                 inputEntropy > check.entropyRange[1]))
                 return;
-            // If the input doesn't match the pattern, move on
-            if (check.pattern &&
-                !check.pattern.test(this.inputStr))
-                return;
+            // If the input doesn't match the pattern, move on. Some regex engines can
+            // throw on pathological inputs, so isolate each detector from the rest of Magic.
+            if (check.pattern) {
+                try {
+                    if (!check.pattern.test(this.inputStr)) return;
+                } catch (err) {
+                    return;
+                }
+            }
 
             matches.push(check);
         });
@@ -137,9 +142,10 @@ class Magic {
     /**
      * Generate various simple brute-forced encodings of the data (trucated to 100 bytes).
      *
+     * @param {boolean} [extLang=false] - Whether extensive language support is enabled.
      * @returns {Object[]} - The encoded data and an operation config to generate it.
      */
-    async bruteForce() {
+    async bruteForce(extLang=false) {
         const sample = new Uint8Array(this.inputBuffer).slice(0, 100);
         const results = [];
 
@@ -173,6 +179,10 @@ class Magic {
          */
         const testEnc = async op => {
             for (let i = 0; i < encodings.length; i++) {
+                if (!extLang && op === "Encode text" && encodings[i] === "UTF-7 (65000)") {
+                    continue;
+                }
+
                 const conf = {
                     op: op,
                     args: [encodings[i]]
@@ -301,7 +311,7 @@ class Magic {
 
         if (intensive) {
             // Run brute forcing of various types on the data and create a new branch for each option
-            const bfEncodings = await this.bruteForce();
+            const bfEncodings = await this.bruteForce(extLang);
 
             await Promise.all(bfEncodings.map(async enc => {
                 const magic = new Magic(enc.data, this.opCriteria, undefined),
@@ -376,7 +386,7 @@ class Magic {
 
         const recipe = new Recipe(recipeConfig);
         try {
-            await recipe.execute(dish);
+            await recipe.execute(dish, 0, {}, true);
             // Return an empty buffer if the recipe did not run to completion
             if (recipe.lastRunOp === recipe.opList[recipe.opList.length - 1]) {
                 return await dish.get(Dish.ARRAY_BUFFER);
