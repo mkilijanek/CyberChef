@@ -1195,6 +1195,7 @@ class Utils {
 
     /**
      * Parses URI parameters into a JSON object.
+     * Malformed percent escapes remain literal; invalid UTF-8 uses replacement characters.
      *
      * @param {string} paramStr - The serialised query or hash section of a URI
      * @returns {object}
@@ -1227,7 +1228,7 @@ class Utils {
             if (param.length !== 2) {
                 result[key] = true;
             } else {
-                result[key] = decodeURIComponent(param[1].replace(/\+/g, " "));
+                result[key] = new URLSearchParams("value=" + param[1]).get("value");
             }
         }
 
