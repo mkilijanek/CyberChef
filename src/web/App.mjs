@@ -11,7 +11,7 @@ import HTMLCategory from "./HTMLCategory.mjs";
 import HTMLOperation from "./HTMLOperation.mjs";
 import Split from "split.js";
 import moment from "moment-timezone";
-import cptable from "codepage";
+import {decodeChrEnc} from "../core/lib/ChrEnc.mjs";
 
 
 /**
@@ -543,7 +543,7 @@ class App {
                 const inputChrEnc = this.manager.input.getChrEnc();
                 const inputData = fromBase64(this.uriParams.input, null, "byteArray");
                 if (inputChrEnc > 0) {
-                    inputVal = cptable.utils.decode(inputChrEnc, inputData);
+                    inputVal = decodeChrEnc(inputChrEnc, inputData);
                 } else {
                     inputVal = Utils.byteArrayToChars(inputData);
                 }

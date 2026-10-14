@@ -28,6 +28,7 @@ import "./tests/Categories.mjs";
 import "./tests/ToHTMLEntity.mjs";
 import "./tests/lib/BigIntUtils.mjs";
 import "./tests/lib/ChartsProtocolPrototypePollution.mjs";
+import "./tests/lib/CryptoBrowserify.mjs";
 import "./tests/ParseQRCode.mjs";
 
 const testStatus = {

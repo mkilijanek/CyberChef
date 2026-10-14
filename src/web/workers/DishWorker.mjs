@@ -8,9 +8,8 @@
 
 import Dish from "../../core/Dish.mjs";
 import DishError from "../../core/errors/DishError.mjs";
-import { CHR_ENC_SIMPLE_REVERSE_LOOKUP } from "../../core/lib/ChrEnc.mjs";
+import { CHR_ENC_SIMPLE_REVERSE_LOOKUP, decodeChrEnc } from "../../core/lib/ChrEnc.mjs";
 import Utils from "../../core/Utils.mjs";
-import cptable from "codepage";
 import loglevelMessagePrefix from "loglevel-message-prefix";
 
 loglevelMessagePrefix(log, {
@@ -100,7 +99,7 @@ async function bufferToStr(data) {
         str = Utils.arrayBufferToStr(data.buffer);
     } else {
         try {
-            str = cptable.utils.decode(data.encoding, new Uint8Array(data.buffer));
+            str = decodeChrEnc(data.encoding, new Uint8Array(data.buffer));
         } catch (err) {
             str = new DishError(`Error decoding buffer with encoding ${CHR_ENC_SIMPLE_REVERSE_LOOKUP[data.encoding]}: ${err.message}`).toString();
         }
