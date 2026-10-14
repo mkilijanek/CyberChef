@@ -209,6 +209,9 @@
     "qs": "^6.15.0",
     "globule": {
       "minimatch": "^3.1.5"
+    },
+    "mocha": {
+      "serialize-javascript": "^7.0.5"
     }
   },
   "scripts": {
