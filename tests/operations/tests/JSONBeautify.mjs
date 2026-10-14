@@ -150,4 +150,17 @@ TestRegister.addTests([
             }
         ],
     },
+    {
+        // CodeQL js/incomplete-sanitization: backslashes and control characters
+        // in string values must be escaped in the formatted view, not only quotes.
+        name: "JSON Beautify: formatted string escapes backslashes, quotes and control characters",
+        input: "{\"a\":\"x\\\\y\\\"z\\n<b>\"}",
+        expectedOutput: "<div class=\"json-document\"><details open class=\"json-details\"><summary class=\"json-summary json-obj\"></summary><span class=\"json-brace\">{</span><ul class=\"json-dict\"><li>a<span class=\"json-colon\">:</span> <span class=\"json-string\">&quot;x\\\\y\\&quot;z\\n&lt;b&gt;&quot;</span></li></ul><span class=\"json-brace\">}</span></details></div>",
+        recipeConfig: [
+            {
+                op: "JSON Beautify",
+                args: ["    ", false, true],
+            },
+        ],
+    },
 ]);

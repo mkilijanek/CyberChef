@@ -167,15 +167,14 @@ function json2html(json, options) {
             return html;
         }
 
-        // Escape tags and quotes
-        json = Utils.escapeHtml(json);
-
         if (options.withLinks && isUrl(json)) {
+            // Escape tags and quotes
+            json = Utils.escapeHtml(json);
             html += `<a href="${json}" class="json-string" target="_blank" rel="noopener noreferrer">${json}</a>`;
         } else {
-            // Escape double quotes in the rendered non-URL string.
-            json = json.replace(/&quot;/g, "\\&quot;");
-            html += `<span class="json-string">"${json}"</span>`;
+            // Re-encode as a JSON string literal so that quotes, backslashes and control
+            // characters are escaped as JSON requires, then escape the result for HTML.
+            html += `<span class="json-string">${Utils.escapeHtml(JSON.stringify(json))}</span>`;
         }
     } else if (typeof json === "number" || typeof json === "bigint") {
         html += `<span class="json-literal">${json}</span>`;
