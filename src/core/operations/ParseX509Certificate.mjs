@@ -10,7 +10,19 @@ import { runHash } from "../lib/Hash.mjs";
 import { fromHex, toHex } from "../lib/Hex.mjs";
 import { formatByteStr, formatDnObj } from "../lib/PublicKey.mjs";
 import Operation from "../Operation.mjs";
+import OperationError from "../errors/OperationError.mjs";
 import Utils from "../Utils.mjs";
+
+/**
+ * Key and signature algorithms which jsrsasign cannot load, keyed by OID.
+ * Their public keys are raw byte strings (RFC 8410).
+ */
+const RAW_KEY_ALGORITHMS = {
+    "1.3.101.110": "X25519",
+    "1.3.101.111": "X448",
+    "1.3.101.112": "Ed25519",
+    "1.3.101.113": "Ed448"
+};
 
 /**
  * Parse X.509 certificate operation
@@ -86,9 +98,11 @@ class ParseX509Certificate extends Operation {
             sn = cert.getSerialNumberHex(),
             issuer = cert.getIssuer(),
             subject = cert.getSubject(),
-            pk = cert.getPublicKey(),
+            pk = getPublicKey(cert),
             pkFields = [],
-            sig = cert.getSignatureValueHex();
+            sig = cert.getSignatureValueHex(),
+            sigAlgOid = cert.getSignatureAlgorithmField(),
+            sigAlgName = RAW_KEY_ALGORITHMS[sigAlgOid] || cert.getSignatureAlgorithmName();
 
         let pkStr = "",
             sigStr = "",
@@ -130,6 +144,15 @@ class ParseX509Certificate extends Operation {
                 key: "G",
                 value: formatByteStr(pk.g.toString(16), 16, 18)
             });
+        } else if (pk.raw) { // EdDSA, X25519, X448 or other raw keys
+            pkFields.push({
+                key: "Length",
+                value: (pk.pubKeyHex.length * 4) + " bits"
+            });
+            pkFields.push({
+                key: "pub",
+                value: formatByteStr(pk.pubKeyHex, 16, 18)
+            });
         } else if (pk.e) { // RSA
             pkFields.push({
                 key: "Length",
@@ -160,10 +183,13 @@ class ParseX509Certificate extends Operation {
 
         // Signature fields
         let breakoutSig = false;
-        try {
-            breakoutSig = r.ASN1HEX.dump(sig).indexOf("SEQUENCE") === 0;
-        } catch (err) {
-            // Error processing signature, output without further breakout
+        // EdDSA signatures are raw byte strings which may happen to look like a SEQUENCE
+        if (!RAW_KEY_ALGORITHMS[sigAlgOid]) {
+            try {
+                breakoutSig = r.ASN1HEX.dump(sig).indexOf("SEQUENCE") === 0;
+            } catch (err) {
+                // Error processing signature, output without further breakout
+            }
         }
 
         if (breakoutSig) { // DSA or ECDSA
@@ -185,7 +211,7 @@ class ParseX509Certificate extends Operation {
 
         return `Version:          ${cert.version} (0x${Utils.hex(cert.version - 1)})
 Serial number:    ${new r.BigInteger(sn, 16).toString()} (0x${sn})
-Algorithm ID:     ${cert.getSignatureAlgorithmField()}
+Algorithm ID:     ${sigAlgOid}
 Validity
   Not Before:     ${nbDate} (dd-mm-yyyy hh:mm:ss) (${cert.getNotBefore()})
   Not After:      ${naDate} (dd-mm-yyyy hh:mm:ss) (${cert.getNotAfter()})
@@ -200,13 +226,44 @@ Fingerprints
 Public Key
 ${pkStr.slice(0, -1)}
 Certificate Signature
-  Algorithm:      ${cert.getSignatureAlgorithmName()}
+  Algorithm:      ${sigAlgName}
 ${sigStr}
 
 Extensions
 ${extensions}`;
     }
 
+}
+
+/**
+ * Returns the certificate's public key. Keys that jsrsasign cannot load, such as Ed25519, are read
+ * directly from the SubjectPublicKeyInfo structure.
+ *
+ * @param {X509} cert
+ * @returns {Object}
+ */
+function getPublicKey(cert) {
+    try {
+        return cert.getPublicKey();
+    } catch (err) {
+        let pk;
+        try {
+            const spki = cert.getPublicKeyHex(),
+                oid = r.KJUR.asn1.ASN1Util.oidHexToInt(r.ASN1HEX.getVbyList(spki, 0, [0, 0])),
+                bitString = r.ASN1HEX.getVbyList(spki, 0, [1]);
+            pk = {
+                type: RAW_KEY_ALGORITHMS[oid] || oid,
+                raw: true,
+                // Drop the leading 'unused bits' byte of the BIT STRING
+                pubKeyHex: bitString.slice(2)
+            };
+        } catch (e) {
+            throw new OperationError(`Unable to parse public key: ${err.message || err}`);
+        }
+        // Other jsrsasign helpers, such as getInfo(), call getPublicKey() and only need the key type
+        cert.getPublicKey = () => pk;
+        return pk;
+    }
 }
 
 /**
