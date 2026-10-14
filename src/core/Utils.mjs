@@ -1033,8 +1033,10 @@ class Utils {
 
         while ((m = recipeRegex.exec(recipe))) {
             // Translate strings in args back to double-quotes
-            args = m[2] // lgtm [js/incomplete-sanitization]
-                .replace(/"/g, '\\"') // Escape double quotes
+            // Backslashes are not escaped on purpose: the pretty format already uses
+            // JSON-compatible escape sequences, so they are passed through unchanged.
+            args = m[2]
+                .replace(/(?<!\\)((?:\\\\)*)"/g, '$1\\"') // Escape double quotes not already escaped
                 .replace(/(^|,|{|:)'/g, '$1"') // Replace opening ' with "
                 .replace(/([^\\]|(?:\\\\)+)'(,|:|}|$)/g, '$1"$2') // Replace closing ' with "
                 .replace(/\\'/g, "'"); // Unescape single quotes
