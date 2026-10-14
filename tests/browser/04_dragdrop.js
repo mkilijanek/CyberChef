@@ -456,7 +456,8 @@ module.exports = {
         browser.execute(function() {
             return decodeURIComponent(window.location.hash);
         }, [], function({value}) {
-            browser.expect(value).to.contain("JWT_Verify('mysecret')");
+            // JWT Verify has a second (algorithm) argument, so match the key argument only
+            browser.expect(value).to.contain("JWT_Verify('mysecret',");
         });
 
         clearRecipe(browser);
