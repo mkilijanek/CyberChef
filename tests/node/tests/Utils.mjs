@@ -21,6 +21,20 @@ TestRegister.addApiTests([
         assert.deepStrictEqual({...Utils.parseURIParams(input)}, expected);
     })),
 
+    it("Utils: parseRecipeConfig accepts an escaped double quote in a pretty recipe", () => {
+        assert.deepStrictEqual(
+            Utils.parseRecipeConfig(String.raw`To_Base64('a\"b')`),
+            [{op: "To Base64", args: ["a\"b"]}]
+        );
+    }),
+
+    it("Utils: parseRecipeConfig round-trips quotes and backslashes", () => {
+        for (const value of ["a\"b", "a\\\"b", "a\\\\\"b", "\\", "x\"", "\"", "\\'"]) {
+            const pretty = Utils.generatePrettyRecipe([{op: "To Base64", args: [value]}]);
+            assert.deepStrictEqual(Utils.parseRecipeConfig(pretty), [{op: "To Base64", args: [value]}]);
+        }
+    }),
+
     it("Utils: should parse six backslashes correctly", () => {
         assert.equal(Utils.parseEscapedChars("\\\\\\\\\\\\"), "\\\\\\");
     }),
