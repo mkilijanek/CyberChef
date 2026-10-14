@@ -80,7 +80,32 @@ class ExtractIPAddresses extends Operation {
 
             // Then we allow IPv4 addresses to be expressed either entirely in decimal or entirely in Octal
             ipv4 = "(?:" + ipv4Decimal + "|" + ipv4Octal + ")",
-            ipv6 = "((?=.*::)(?!.*::.+::)(::)?([\\dA-F]{1,4}:(:|\\b)|){5}|([\\dA-F]{1,4}:){6})(([\\dA-F]{1,4}((?!\\3)::|:\\b|(?![\\dA-F])))|(?!\\2\\3)){2}";
+
+            // IPv6 addresses are matched as one of the RFC 4291 text forms. Each alternative only looks at the
+            // characters it consumes, so other addresses on the same line cannot change how an address is matched.
+            ipv6Group = "[\\dA-F]{1,4}",
+            ipv6EmbeddedIpv4 = "(?:" + ipv4DecimalByte + "\\.){3}" + ipv4DecimalByte,
+            ipv6Forms = [
+                // Trailing dotted-quad forms, e.g. ::ffff:192.0.2.1
+                "(?:" + ipv6Group + ":){6}" + ipv6EmbeddedIpv4,
+                "(?:" + ipv6Group + ":){1,5}:" + ipv6EmbeddedIpv4,
+                "::(?:" + ipv6Group + ":){0,5}" + ipv6EmbeddedIpv4,
+                // Full form
+                "(?:" + ipv6Group + ":){7}" + ipv6Group,
+                // Compressed forms with :: in each possible position
+                "(?:" + ipv6Group + ":){1,7}:",
+                "(?:" + ipv6Group + ":){1,6}:" + ipv6Group,
+                "(?:" + ipv6Group + ":){1,5}(?::" + ipv6Group + "){1,2}",
+                "(?:" + ipv6Group + ":){1,4}(?::" + ipv6Group + "){1,3}",
+                "(?:" + ipv6Group + ":){1,3}(?::" + ipv6Group + "){1,4}",
+                "(?:" + ipv6Group + ":){1,2}(?::" + ipv6Group + "){1,5}",
+                ipv6Group + ":(?::" + ipv6Group + "){1,6}",
+                ":(?::" + ipv6Group + "){1,7}",
+                "::"
+            ],
+
+            // Reject matches that are part of a longer run of address characters, e.g. 1::2::3 or 1:2:3:4:5:6:7:8:9
+            ipv6 = "(?<![\\w:])(?:" + ipv6Forms.join("|") + ")(?![\\w]|:[\\dA-F:]|\\.\\d)";
         let ips  = "";
 
         if (includeIpv4 && includeIpv6) {
