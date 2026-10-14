@@ -20,39 +20,47 @@ const path = require('path');
 
 const target = path.join(__dirname, '..', 'node_modules', 'grunt-legacy-util', 'index.js');
 
-if (!fs.existsSync(target)) {
-    // Not installed yet (e.g. first run before node_modules exist) — skip silently.
-    process.exit(0);
-}
-
 // Guard against symlink attacks: verify the resolved path stays within node_modules
 const expectedBase = path.resolve(path.join(__dirname, '..', 'node_modules'));
+let realTarget;
 try {
-    const realTarget = fs.realpathSync.native(target);
-    if (!realTarget.startsWith(expectedBase + path.sep)) {
-        console.error('[fix-grunt-node24] Path escapes node_modules boundary — aborting.');
-        process.exit(1);
-    }
+    realTarget = fs.realpathSync.native(target);
 } catch (e) {
+    if (e.code === 'ENOENT') {
+        // Not installed yet (e.g. first run before node_modules exist) — skip silently.
+        process.exit(0);
+    }
     console.error('[fix-grunt-node24] Could not resolve realpath — aborting.', e.message);
     process.exit(1);
 }
+if (!realTarget.startsWith(expectedBase + path.sep)) {
+    console.error('[fix-grunt-node24] Path escapes node_modules boundary — aborting.');
+    process.exit(1);
+}
 
-let src = fs.readFileSync(target, 'utf8');
+// Open the checked path once and do all reads and writes through the same descriptor,
+// so the file cannot be swapped between the check, the read and the write.
+// O_NOFOLLOW refuses a symlink planted at the resolved path after the check.
+const fd = fs.openSync(realTarget, fs.constants.O_RDWR | (fs.constants.O_NOFOLLOW || 0));
+let src = fs.readFileSync(fd, 'utf8');
 
 const OLD = 'if (!nodeUtil.isError(err)) { err = new Error(err); }';
 const NEW = 'if (!(err instanceof Error)) { err = new Error(err); } /* patched: util.isError removed in Node.js 22 */';
 
 if (src.includes(NEW)) {
     console.log('[fix-grunt-node24] grunt-legacy-util already patched — skipping.');
+    fs.closeSync(fd);
     process.exit(0);
 }
 
 if (!src.includes(OLD)) {
     console.warn('[fix-grunt-node24] WARNING: Expected pattern not found in grunt-legacy-util/index.js — the package may have been updated. Review this script.');
+    fs.closeSync(fd);
     process.exit(0);
 }
 
 src = src.replace(OLD, NEW);
-fs.writeFileSync(target, src, 'utf8');
+fs.ftruncateSync(fd, 0);
+fs.writeSync(fd, src, 0, 'utf8');
+fs.closeSync(fd);
 console.log('[fix-grunt-node24] Patched grunt-legacy-util for Node.js 22+ compatibility.');
