@@ -26,7 +26,7 @@ class RSAEncrypt extends Operation {
         this.description = "Encrypt a message with a PEM encoded RSA public key.";
         this.infoURL = "https://wikipedia.org/wiki/RSA_(cryptosystem)";
         this.inputType = "byteArray";
-        this.outputType = "string";
+        this.outputType = "byteArray";
         this.args = [
             {
                 name: "RSA Public Key (PEM)",
@@ -61,7 +61,7 @@ class RSAEncrypt extends Operation {
     /**
      * @param {byteArray} input
      * @param {Object[]} args
-     * @returns {string}
+     * @returns {byteArray}
      */
     run(input, args) {
         const [pemKey, scheme, md] = args;
@@ -77,7 +77,7 @@ class RSAEncrypt extends Operation {
             const plaintextBytes = Utils.byteArrayToChars(input);
             // Encrypt message
             const eMsg = pubKey.encrypt(plaintextBytes, scheme, {md: MD_ALGORITHMS[md].create()});
-            return eMsg;
+            return Utils.strToByteArray(eMsg);
         } catch (err) {
             if (err.message === "RSAES-OAEP input message length is too long.") {
                 throw new OperationError(`RSAES-OAEP input message length (${err.length}) is longer than the maximum allowed length (${err.maxLength}).`);
