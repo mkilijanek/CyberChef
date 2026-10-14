@@ -30,6 +30,7 @@ import "./tests/lib/BigIntUtils.mjs";
 import "./tests/lib/ChartsProtocolPrototypePollution.mjs";
 import "./tests/lib/CryptoBrowserify.mjs";
 import "./tests/ParseQRCode.mjs";
+import "./tests/DisassembleX86.mjs";
 
 const testStatus = {
     allTestsPassing: true,
