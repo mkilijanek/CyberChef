@@ -8,7 +8,7 @@ import Operation from "../Operation.mjs";
 import Utils from "../Utils.mjs";
 import forge from "node-forge";
 import OperationError from "../errors/OperationError.mjs";
-import { getAESAlgorithm } from "../lib/AES.mjs";
+import { getAESAlgorithm, getAESIV } from "../lib/AES.mjs";
 import { toHexFast } from "../lib/Hex.mjs";
 
 /**
@@ -135,9 +135,10 @@ The following algorithms will be used based on the size of the key:
         if (noPadding && input.length % 16 !== 0) {
             throw new OperationError("Input length must be a multiple of 16 bytes for NoPadding modes.");
         }
+        const effectiveIV = getAESIV(iv, mode);
         const cipher = forge.cipher.createCipher(getAESAlgorithm(mode), key);
         cipher.start({
-            iv: (iv.length === 0 && mode !== "GCM") ? "\x00".repeat(16) : iv,
+            iv: effectiveIV,
             additionalData: mode === "GCM" ? aad : undefined
         });
         if (noPadding) {
@@ -151,9 +152,9 @@ The following algorithms will be used based on the size of the key:
         let output = cipher.output.getBytes();
 
         if (includeIV === "Prepend") {
-            output = iv + output;
+            output = effectiveIV + output;
         } else if (includeIV === "Append") {
-            output = output + iv;
+            output = output + effectiveIV;
         }
 
         if (outputType === "Hex") {

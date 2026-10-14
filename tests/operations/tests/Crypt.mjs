@@ -115,6 +115,69 @@ The following algorithms will be used based on the size of the key:
         ],
     },
     {
+        name: "AES Encrypt: AES-128-CBC with empty IV, prepends the IV that was used",
+        input: "The quick brown fox jumps over the lazy dog.",
+        expectedOutput: "000000000000000000000000000000002ef6c3fdb1314b5c2c326a2087fe1a82d5e73bf605ec8431d73e847187fc1c8fbbe969c177df1ecdf8c13f2f505f9498",
+        recipeConfig: [
+            {
+                "op": "AES Encrypt",
+                "args": [
+                    {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
+                    {"option": "Hex", "string": ""},
+                    "CBC", "Raw", "Hex",
+                    {"option": "Hex", "string": ""},
+                    "Prepend"
+                ]
+            }
+        ],
+    },
+    {
+        name: "AES Encrypt/Decrypt: AES-128-CBC with empty IV, IV taken from input",
+        input: "The quick brown fox jumps over the lazy dog.",
+        expectedOutput: "The quick brown fox jumps over the lazy dog.",
+        recipeConfig: [
+            {
+                "op": "AES Encrypt",
+                "args": [
+                    {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
+                    {"option": "Hex", "string": ""},
+                    "CBC", "Raw", "Raw",
+                    {"option": "Hex", "string": ""},
+                    "Append"
+                ]
+            },
+            {
+                "op": "AES Decrypt",
+                "args": [
+                    {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
+                    {"option": "Hex", "string": ""},
+                    16,
+                    "CBC", "Raw", "Raw",
+                    {"option": "Hex", "string": ""},
+                    {"option": "Hex", "string": ""},
+                    "From end"
+                ]
+            }
+        ],
+    },
+    {
+        name: "AES Encrypt: AES-128-CBC with short IV",
+        input: "The quick brown fox jumps over the lazy dog.",
+        expectedOutput: "Invalid IV length: 2 bytes. CBC mode requires a 16 byte IV.",
+        recipeConfig: [
+            {
+                "op": "AES Encrypt",
+                "args": [
+                    {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
+                    {"option": "Hex", "string": "0011"},
+                    "CBC", "Raw", "Hex",
+                    {"option": "Hex", "string": ""},
+                    "Off"
+                ]
+            }
+        ],
+    },
+    {
         name: "AES Encrypt: AES-128-CTR with IV0, ASCII",
         input: "The quick brown fox jumps over the lazy dog.",
         expectedOutput: "a98c9e8e3b7c894384d740e4f0f4ed0be2bbb1e0e13a255812c3c6b0a629e4ad759c075b2469c6f4fb2c0cf9",
@@ -915,6 +978,44 @@ The following algorithms will be used based on the size of the key:
                 "args": [
                     {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
                     {"option": "Hex", "string": "00000000000000000000000000000000"},
+                    16,
+                    "CBC", "Hex", "Raw",
+                    {"option": "Hex", "string": ""},
+                    {"option": "Hex", "string": ""},
+                    "Off"
+                ]
+            }
+        ],
+    },
+    {
+        name: "AES Decrypt: AES-128-CBC with empty IV, ASCII",
+        input: "2ef6c3fdb1314b5c2c326a2087fe1a82d5e73bf605ec8431d73e847187fc1c8fbbe969c177df1ecdf8c13f2f505f9498",
+        expectedOutput: "The quick brown fox jumps over the lazy dog.",
+        recipeConfig: [
+            {
+                "op": "AES Decrypt",
+                "args": [
+                    {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
+                    {"option": "Hex", "string": ""},
+                    16,
+                    "CBC", "Hex", "Raw",
+                    {"option": "Hex", "string": ""},
+                    {"option": "Hex", "string": ""},
+                    "Off"
+                ]
+            }
+        ],
+    },
+    {
+        name: "AES Decrypt: AES-128-CBC with short IV",
+        input: "2ef6c3fdb1314b5c2c326a2087fe1a82d5e73bf605ec8431d73e847187fc1c8fbbe969c177df1ecdf8c13f2f505f9498",
+        expectedOutput: "Invalid IV length: 2 bytes. CBC mode requires a 16 byte IV.",
+        recipeConfig: [
+            {
+                "op": "AES Decrypt",
+                "args": [
+                    {"option": "Hex", "string": "00112233445566778899aabbccddeeff"},
+                    {"option": "Hex", "string": "0011"},
                     16,
                     "CBC", "Hex", "Raw",
                     {"option": "Hex", "string": ""},

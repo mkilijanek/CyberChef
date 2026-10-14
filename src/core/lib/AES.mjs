@@ -6,6 +6,7 @@
  */
 
 import forge from "node-forge";
+import OperationError from "../errors/OperationError.mjs";
 
 /**
  * Name under which the full-width CTR mode is registered with forge.
@@ -73,4 +74,26 @@ export function getAESAlgorithm(mode) {
         registered = true;
     }
     return AES_CTR_FULL;
+}
+
+
+/**
+ * Returns the IV to use for the given AES mode.
+ *
+ * An empty IV defaults to 16 null bytes in every mode that takes a 16-byte IV, so AES Encrypt and AES Decrypt
+ * agree on the IV that was actually used. ECB ignores the IV and GCM accepts IVs of any length, so both are
+ * passed through unchanged.
+ *
+ * @param {string} iv - IV as a byte string
+ * @param {string} mode - e.g. "CBC", "CTR", "GCM"
+ * @returns {string}
+ * @throws {OperationError} if the IV is not 16 bytes long in a mode that requires it
+ */
+export function getAESIV(iv, mode) {
+    if (mode === "ECB" || mode === "GCM") return iv;
+    if (iv.length === 0) return "\x00".repeat(16);
+    if (iv.length !== 16) {
+        throw new OperationError(`Invalid IV length: ${iv.length} bytes. ${mode} mode requires a 16 byte IV.`);
+    }
+    return iv;
 }
