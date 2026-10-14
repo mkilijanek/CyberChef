@@ -7,8 +7,7 @@
 
 import Operation from "../Operation.mjs";
 import Utils from "../Utils.mjs";
-import cptable from "codepage";
-import {CHR_ENC_CODE_PAGES} from "../lib/ChrEnc.mjs";
+import {CHR_ENC_CODE_PAGES, decodeChrEnc, encodeChrEnc} from "../lib/ChrEnc.mjs";
 
 /**
  * Text Encoding Brute Force operation
@@ -58,9 +57,9 @@ class TextEncodingBruteForce extends Operation {
         charsets.forEach(charset => {
             try {
                 if (mode === "Decode") {
-                    output[charset] = cptable.utils.decode(CHR_ENC_CODE_PAGES[charset], input);
+                    output[charset] = decodeChrEnc(CHR_ENC_CODE_PAGES[charset], input);
                 } else {
-                    output[charset] = Utils.arrayBufferToStr(cptable.utils.encode(CHR_ENC_CODE_PAGES[charset], stringInput));
+                    output[charset] = Utils.arrayBufferToStr(encodeChrEnc(CHR_ENC_CODE_PAGES[charset], stringInput));
                 }
             } catch (err) {
                 output[charset] = "Could not decode.";

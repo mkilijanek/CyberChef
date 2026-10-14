@@ -6,8 +6,7 @@
 
 import Operation from "../Operation.mjs";
 import OperationError from "../errors/OperationError.mjs";
-import cptable from "codepage";
-import {CHR_ENC_CODE_PAGES} from "../lib/ChrEnc.mjs";
+import {CHR_ENC_CODE_PAGES, decodeChrEnc} from "../lib/ChrEnc.mjs";
 
 /**
  * Decode text operation
@@ -52,7 +51,7 @@ class DecodeText extends Operation {
         if (!format) {
             throw new OperationError("Invalid encoding");
         }
-        return cptable.utils.decode(format, new Uint8Array(input));
+        return decodeChrEnc(format, new Uint8Array(input));
     }
 
 }

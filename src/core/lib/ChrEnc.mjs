@@ -306,3 +306,144 @@ export function isUTF8(data) {
 
     return onlyASCII ? 1 : 2;
 }
+
+
+/**
+ * GB18030 code page number.
+ */
+const GB18030 = 54936;
+
+/**
+ * The codepage library only implements the one and two byte parts of GB18030, so characters which need
+ * the four byte form (e.g. CJK Extension G or U+0080) are encoded as 0x00 and four byte sequences cannot be
+ * decoded. The platform TextDecoder implements all of GB18030, so it is used for decoding and to build the
+ * reverse mapping for encoding.
+ */
+let gb18030Decoder,
+    gb18030EncodeMap;
+
+/**
+ * Returns a GB18030 TextDecoder, or null if the platform does not provide one.
+ *
+ * @returns {TextDecoder|null}
+ */
+function getGB18030Decoder() {
+    if (gb18030Decoder === undefined) {
+        try {
+            gb18030Decoder = new TextDecoder("gb18030");
+        } catch (err) {
+            gb18030Decoder = null;
+        }
+    }
+    return gb18030Decoder;
+}
+
+/**
+ * Converts a GB18030 four byte pointer to its byte sequence.
+ *
+ * @param {number} pointer
+ * @returns {number[]}
+ */
+function gb18030PointerToBytes(pointer) {
+    return [
+        Math.floor(pointer / 12600) + 0x81,
+        Math.floor(pointer / 1260) % 10 + 0x30,
+        Math.floor(pointer / 10) % 126 + 0x81,
+        pointer % 10 + 0x30
+    ];
+}
+
+/**
+ * Builds a map from BMP code points to their GB18030 byte sequences by decoding every two byte sequence
+ * and every four byte sequence in the BMP range. Two byte sequences take precedence.
+ *
+ * @param {TextDecoder} decoder
+ * @returns {Map<number, number[]>}
+ */
+function buildGB18030EncodeMap(decoder) {
+    const map = new Map(),
+        twoByte = [],
+        fourByteCount = 39420, // Pointers 0 to 39419 cover U+0080 to U+FFFF
+        fourByte = new Uint8Array(fourByteCount * 4);
+
+    for (let lead = 0x81; lead <= 0xfe; lead++) {
+        for (let trail = 0x40; trail <= 0xfe; trail++) {
+            if (trail !== 0x7f) twoByte.push(lead, trail);
+        }
+    }
+    const twoByteChars = decoder.decode(new Uint8Array(twoByte));
+    for (let i = 0; i < twoByteChars.length; i++) {
+        const cp = twoByteChars.charCodeAt(i);
+        if (cp !== 0xfffd && !map.has(cp)) map.set(cp, [twoByte[i * 2], twoByte[i * 2 + 1]]);
+    }
+
+    for (let pointer = 0; pointer < fourByteCount; pointer++) {
+        fourByte.set(gb18030PointerToBytes(pointer), pointer * 4);
+    }
+    const fourByteChars = decoder.decode(fourByte);
+    // Each four byte sequence decodes to a single BMP character, so indices line up with pointers
+    if (fourByteChars.length === fourByteCount) {
+        for (let pointer = 0; pointer < fourByteCount; pointer++) {
+            const cp = fourByteChars.charCodeAt(pointer);
+            if (cp !== 0xfffd && !map.has(cp)) map.set(cp, gb18030PointerToBytes(pointer));
+        }
+    }
+
+    return map;
+}
+
+/**
+ * Encodes a string as GB18030.
+ *
+ * @param {string} str
+ * @returns {Uint8Array}
+ */
+function encodeGB18030(str) {
+    if (!gb18030EncodeMap) gb18030EncodeMap = buildGB18030EncodeMap(getGB18030Decoder());
+
+    const bytes = [];
+    for (const chr of str) {
+        const cp = chr.codePointAt(0);
+        if (cp < 0x80) {
+            bytes.push(cp);
+        } else if (cp > 0xffff) {
+            // Supplementary planes are mapped linearly from 0x90308130
+            bytes.push(...gb18030PointerToBytes(cp - 0x10000 + 189000));
+        } else if (gb18030EncodeMap.has(cp)) {
+            bytes.push(...gb18030EncodeMap.get(cp));
+        } else if (Object.prototype.hasOwnProperty.call(cptable[GB18030].enc, chr)) {
+            // Private use code points which GB18030-2005 maps but newer decoders do not
+            const code = cptable[GB18030].enc[chr];
+            bytes.push(code >> 8, code & 0xff);
+        } else {
+            // Lone surrogates have no encoding
+            bytes.push(0x3f);
+        }
+    }
+    return new Uint8Array(bytes);
+}
+
+/**
+ * Encodes a string using the given code page.
+ *
+ * @param {number} page - The code page number
+ * @param {string} str
+ * @returns {Array|Uint8Array}
+ */
+export function encodeChrEnc(page, str) {
+    if (page === GB18030 && getGB18030Decoder()) return encodeGB18030(str);
+    return cptable.utils.encode(page, str);
+}
+
+/**
+ * Decodes bytes using the given code page.
+ *
+ * @param {number} page - The code page number
+ * @param {Uint8Array|number[]} data
+ * @returns {string}
+ */
+export function decodeChrEnc(page, data) {
+    const decoder = page === GB18030 ? getGB18030Decoder() : null;
+    if (decoder) return decoder.decode(data instanceof Uint8Array ? data : new Uint8Array(data));
+    return cptable.utils.decode(page, data);
+}
