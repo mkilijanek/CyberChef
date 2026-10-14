@@ -115,6 +115,40 @@ The following algorithms will be used based on the size of the key:
         ],
     },
     {
+        name: "AES Encrypt: AES-128-CTR with counter overflow",
+        input: "8899aabbccddeeff0011223344556677fe",
+        expectedOutput: "b4ddb58902da6cdc64c680aa4a05dd6438",
+        recipeConfig: [
+            {
+                "op": "AES Encrypt",
+                "args": [
+                    {"option": "Hex", "string": "000102030405060708090a0b0c0d0e0f"},
+                    {"option": "Hex", "string": "ffffffffffffffffffffffffffffffff"},
+                    "CTR", "Hex", "Hex",
+                    {"option": "Hex", "string": ""},
+                    "Off"
+                ]
+            }
+        ],
+    },
+    {
+        name: "AES Encrypt: AES-256-CTR with carry past the low 64 bits",
+        input: "The quick brown fox jumps over the lazy dog.",
+        expectedOutput: "c5126be300179ebbbc8d42dc88c6b3244ef15bc154bdae32e2d2133aaa4c8a5d3ffec1ccb9e85aa86191df3e",
+        recipeConfig: [
+            {
+                "op": "AES Encrypt",
+                "args": [
+                    {"option": "Hex", "string": "603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4"},
+                    {"option": "Hex", "string": "0000000000000000fffffffffffffffe"},
+                    "CTR", "Raw", "Hex",
+                    {"option": "Hex", "string": ""},
+                    "Off"
+                ]
+            }
+        ],
+    },
+    {
         name: "AES Encrypt: AES-128-CBC with IV1, ASCII",
         input: "The quick brown fox jumps over the lazy dog.",
         expectedOutput: "4fa077d50cc71a57393e7b542c4e3aea0fb75383b97083f2f568ffc13c0e7a47502ec6d9f25744a061a3a5e55fe95e8d",
@@ -885,6 +919,25 @@ The following algorithms will be used based on the size of the key:
                     {"option": "Hex", "string": "00000000000000000000000000000000"},
                     16,
                     "CTR", "Hex", "Raw",
+                    {"option": "Hex", "string": ""},
+                    {"option": "Hex", "string": ""},
+                    "Off"
+                ]
+            }
+        ],
+    },
+    {
+        name: "AES Decrypt: AES-128-CTR with counter overflow",
+        input: "b4ddb58902da6cdc64c680aa4a05dd6438",
+        expectedOutput: "8899aabbccddeeff0011223344556677fe",
+        recipeConfig: [
+            {
+                "op": "AES Decrypt",
+                "args": [
+                    {"option": "Hex", "string": "000102030405060708090a0b0c0d0e0f"},
+                    {"option": "Hex", "string": "ffffffffffffffffffffffffffffffff"},
+                    16,
+                    "CTR", "Hex", "Hex",
                     {"option": "Hex", "string": ""},
                     {"option": "Hex", "string": ""},
                     "Off"

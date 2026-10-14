@@ -8,6 +8,7 @@ import Operation from "../Operation.mjs";
 import Utils from "../Utils.mjs";
 import forge from "node-forge";
 import OperationError from "../errors/OperationError.mjs";
+import { getAESAlgorithm } from "../lib/AES.mjs";
 
 /**
  * AES Decrypt operation
@@ -175,7 +176,7 @@ The following algorithms will be used based on the size of the key:
             iv = Utils.convertToByteString(args[1].string, args[1].option);
         }
 
-        const decipher = forge.cipher.createDecipher("AES-" + mode, key);
+        const decipher = forge.cipher.createDecipher(getAESAlgorithm(mode), key);
 
         /* Allow for a "no padding" mode */
         if (noPadding) {
