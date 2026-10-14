@@ -129,5 +129,70 @@ TestRegister.addTests([
             },
         ],
     },
+    {
+        name: "ExtractIPAddress IPv6 full and compressed forms on one line",
+        input: "2001:0db8:0001:0000:0000:0ab9:C0A8:0102 can be compressed as follows: 2001:db8:1::ab9:C0A8:102.",
+        expectedOutput: "2001:0db8:0001:0000:0000:0ab9:C0A8:0102\n2001:db8:1::ab9:C0A8:102",
+        recipeConfig: [
+            {
+                "op": "Extract IP addresses",
+                "args": [false, true, false, false, false, false]
+            },
+        ],
+    },
+    {
+        name: "ExtractIPAddress IPv6 multiple compressed addresses on one line",
+        input: "a 2001:db8::1, 2001:db8::2; [2001:db8::3]:443 ::1 fe80::1%eth0",
+        expectedOutput: "2001:db8::1\n2001:db8::2\n2001:db8::3\n::1\nfe80::1",
+        recipeConfig: [
+            {
+                "op": "Extract IP addresses",
+                "args": [false, true, false, false, false, false]
+            },
+        ],
+    },
+    {
+        name: "ExtractIPAddress IPv6 compressed boundaries",
+        input: "fe80:: 1:2:3:4:5:6:7:: 1:2:3:4:5:6::8 1::2:3:4:5:6:7 ::",
+        expectedOutput: "fe80::\n1:2:3:4:5:6:7::\n1:2:3:4:5:6::8\n1::2:3:4:5:6:7\n::",
+        recipeConfig: [
+            {
+                "op": "Extract IP addresses",
+                "args": [false, true, false, false, false, false]
+            },
+        ],
+    },
+    {
+        name: "ExtractIPAddress IPv6 embedded IPv4",
+        input: "::ffff:192.0.2.1 64:ff9b::192.0.2.33 1:2:3:4:5:6:1.2.3.4",
+        expectedOutput: "::ffff:192.0.2.1\n64:ff9b::192.0.2.33\n1:2:3:4:5:6:1.2.3.4",
+        recipeConfig: [
+            {
+                "op": "Extract IP addresses",
+                "args": [false, true, false, false, false, false]
+            },
+        ],
+    },
+    {
+        name: "ExtractIPAddress IPv6 invalid",
+        input: "1:2:3:4:5:6:7:8:9 1::2::3 12345::1 std::cout 10:30:00 00:11:22:33:44:55",
+        expectedOutput: "",
+        recipeConfig: [
+            {
+                "op": "Extract IP addresses",
+                "args": [false, true, false, false, false, false]
+            },
+        ],
+    },
+    {
+        name: "ExtractIPAddress IPv4 and IPv6 mixed",
+        input: "10.0.0.1 then 2001:db8::1 then ::ffff:10.0.0.2",
+        expectedOutput: "10.0.0.1\n2001:db8::1\n::ffff:10.0.0.2",
+        recipeConfig: [
+            {
+                "op": "Extract IP addresses",
+                "args": [true, true, false, false, false, false]
+            },
+        ],
+    },
 ]);
-

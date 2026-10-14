@@ -113,4 +113,49 @@ TestRegister.addTests([
             },
         ],
     },
+    {
+        name: "Encode text (GB18030): one, two and four byte characters",
+        input: "a\u4e2d\u0080\u20ac\u{302F8}\u{1F600}\ue78d",
+        expectedOutput: "61 d6 d0 81 30 81 30 a2 e3 9a 34 d0 32 94 39 fc 36 a6 d9",
+        recipeConfig: [
+            {
+                "op": "Encode text",
+                "args": ["Simplified Chinese GB18030 (54936)"]
+            },
+            {
+                "op": "To Hex",
+                "args": ["Space"]
+            },
+        ],
+    },
+    {
+        name: "Decode text (GB18030): one, two and four byte characters",
+        input: "61 d6 d0 81 30 81 30 a2 e3 9a 34 d0 32 94 39 fc 36",
+        expectedOutput: "a\u4e2d\u0080\u20ac\u{302F8}\u{1F600}",
+        recipeConfig: [
+            {
+                "op": "From Hex",
+                "args": ["Space"]
+            },
+            {
+                "op": "Decode text",
+                "args": ["Simplified Chinese GB18030 (54936)"]
+            },
+        ],
+    },
+    {
+        name: "Encode text, Decode text (GB18030): CJK Extension G round trip",
+        input: "\u{30000}\u{302F8}\u{3134A}",
+        expectedOutput: "\u{30000}\u{302F8}\u{3134A}",
+        recipeConfig: [
+            {
+                "op": "Encode text",
+                "args": ["Simplified Chinese GB18030 (54936)"]
+            },
+            {
+                "op": "Decode text",
+                "args": ["Simplified Chinese GB18030 (54936)"]
+            },
+        ],
+    },
 ]);

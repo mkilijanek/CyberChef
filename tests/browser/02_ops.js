@@ -220,8 +220,8 @@ module.exports = {
     // testOp(browser, "JSON to CSV", "test input", "test_output");
         testOp(browser, "Jsonata Query", '{"a": "SGVsbG8gV29ybGQh"}', '"Hello World!"', ["$base64decode($.a)"]);
     // testOp(browser, "JWT Decode", "test input", "test_output");
-    // testOp(browser, "JWT Sign", "test input", "test_output");
-    // testOp(browser, "JWT Verify", "test input", "test_output");
+        testOp(browser, "JWT Sign", '{"sub":"user123","iat":1700000000}', "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiaWF0IjoxNzAwMDAwMDAwfQ.z8XMEHOOIi1Pz7_srM8aJKIEZ_tP3fs5uZ9P0vWwI_4", ["secret", "HS256", "{}"]);
+        testOp(browser, "JWT Verify", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyMTIzIiwiaWF0IjoxNzAwMDAwMDAwfQ.z8XMEHOOIi1Pz7_srM8aJKIEZ_tP3fs5uZ9P0vWwI_4", '{\n    "sub": "user123",\n    "iat": 1700000000\n}', ["secret"]);
     // testOp(browser, "JavaScript Beautify", "test input", "test_output");
     // testOp(browser, "JavaScript Minify", "test input", "test_output");
     // testOp(browser, "JavaScript Parser", "test input", "test_output");

@@ -9,7 +9,7 @@ import LoaderWorker from "worker-loader?inline=no-fallback!../workers/LoaderWork
 import InputWorker from "worker-loader?inline=no-fallback!../workers/InputWorker.mjs";
 import Utils, {debounce} from "../../core/Utils.mjs";
 import {toBase64} from "../../core/lib/Base64.mjs";
-import cptable from "codepage";
+import {decodeChrEnc, encodeChrEnc} from "../../core/lib/ChrEnc.mjs";
 
 import {
     EditorView,
@@ -646,7 +646,7 @@ class InputWaiter {
             this.manager.timing.recordTime("inputEncodingStart", inputNum);
             let inputVal;
             if (this.getChrEnc() > 0) {
-                inputVal = cptable.utils.decode(this.inputChrEnc, new Uint8Array(inputData.buffer));
+                inputVal = decodeChrEnc(this.inputChrEnc, new Uint8Array(inputData.buffer));
             } else {
                 inputVal = Utils.arrayBufferToStr(inputData.buffer);
             }
@@ -786,7 +786,7 @@ class InputWaiter {
         if (typeof value === "string") {
             stringSample = value.slice(0, 4096);
             if (this.getChrEnc() > 0) {
-                buffer = cptable.utils.encode(this.getChrEnc(), value);
+                buffer = encodeChrEnc(this.getChrEnc(), value);
                 buffer = new Uint8Array(buffer).buffer;
             } else {
                 buffer = Utils.strToArrayBuffer(value);
@@ -1700,9 +1700,10 @@ class InputWaiter {
             !allowedOrigins.includes(e.origin)) {
             return;
         }
-        if ("data" in e && "id" in e.data && "value" in e.data) {
-            if (e.data.id === "setInput") {
-                this.setInput(e.data.value);
+        const data = e?.data;
+        if (data !== null && typeof data === "object" && "id" in data && "value" in data) {
+            if (data.id === "setInput") {
+                this.setInput(data.value);
             }
         }
     }

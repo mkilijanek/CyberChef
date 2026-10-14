@@ -123,7 +123,8 @@ module.exports = {
             "assert": require.resolve("assert/"),
             "buffer": require.resolve("buffer/"),
             "child_process": false,
-            "crypto": require.resolve("crypto-browserify"),
+            // crypto-browserify plus the KeyObject API needed by jsonwebtoken
+            "crypto": path.resolve(__dirname, "src/web/utils/cryptoBrowserify.mjs"),
             "events": require.resolve("events/"),
             "fs": false,
             "net": false,
