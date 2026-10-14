@@ -1,5 +1,7 @@
 # 🚀 Security Automation - Quick Start Guide
 
+> **Uwaga (2026-10):** workflow `security-auto-fix.yml` został usunięty (#105). Aktualizacje zależności npm obsługuje wyłącznie Dependabot (`.github/dependabot.yml`), a dzienny `npm audit fix` kolidował z jego PR-ami. Lokalnie nadal działają `npm run security:triage` i `npm run security:fix`. Opisy workflow poniżej są historyczne.
+
 **5-minutowy przewodnik uruchomienia automatyzacji bezpieczeństwa**
 
 ---
@@ -49,7 +51,6 @@ git push
 https://github.com/{owner}/{repo}/actions
 
 # Powinny być widoczne:
-# ✅ Security Auto-Fix
 # ✅ Dependency Review
 # ✅ CodeQL Analysis
 
@@ -87,8 +88,8 @@ npm run security:triage:json  # → vulnerability-report.json
 # Force fix critical
 npm audit fix --force
 
-# Manual workflow trigger
-gh workflow run security-auto-fix.yml
+# Lokalne naprawy (backup package-lock.json, potem npm test ręcznie)
+npm run security:fix
 ```
 
 ---
@@ -115,11 +116,10 @@ gh workflow run security-auto-fix.yml
 ### Po Południu (30 min)
 
 ```
-☐ 4. Trigger manual workflow
-     → Actions → Security Auto-Fix → Run workflow
-     → Obserwuj logi
+☐ 4. Sprawdź otwarte PR-y Dependabota
+     → Pull requests → author:app/dependabot
 
-☐ 5. Review utworzony PR (jeśli powstał)
+☐ 5. Review PR-ów Dependabota
      → Przejrzyj zmiany
      → Sprawdź testy
      → Merge jeśli OK
@@ -159,11 +159,8 @@ gh workflow run security-auto-fix.yml
 Repository → Settings → Actions → General
 ☑ Read and write permissions
 
-# 2. Enable workflow
-gh workflow enable security-auto-fix.yml
-
-# 3. Manual trigger
-gh workflow run security-auto-fix.yml
+# 2. Sprawdź, czy Actions nie są wyłączone dla repozytorium
+gh workflow list
 ```
 
 ### Problem: "Za dużo Dependabot PRs"
@@ -182,10 +179,8 @@ open-pull-requests-limit: 3  # było: 10
 
 ```bash
 # Rozwiązanie:
-# Workflow automatycznie rollback'uje changes
-# Nic nie musisz robić - sprawdź logi:
-
-Actions → Security Auto-Fix → Latest run → Logs
+# npm run security:fix zostawia package-lock.json.backup:
+mv package-lock.json.backup package-lock.json && npm ci
 # Zobacz który package powoduje problem
 # Fix manually lub ignore w dependabot.yml
 ```
