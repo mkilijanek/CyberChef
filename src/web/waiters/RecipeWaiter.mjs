@@ -26,6 +26,9 @@ class RecipeWaiter {
         this.app = app;
         this.manager = manager;
         this.removeIntent = false;
+        // Set whenever an operation is being dragged, from either the operations list or the recipe
+        // list. Both Sortable instances must maintain it: several drop targets rely on it to tell an
+        // operation drag apart from a file or text drag.
         this.dragInProgress = false;
     }
 
@@ -47,7 +50,11 @@ class RecipeWaiter {
             setData: function(dataTransfer, dragEl) {
                 dataTransfer.setData("Text", dragEl.querySelector(".op-title").textContent);
             },
+            onStart: function() {
+                this.dragInProgress = true;
+            }.bind(this),
             onEnd: function(evt) {
+                this.dragInProgress = false;
                 if (this.removeIntent) {
                     evt.item.remove();
                     evt.target.dispatchEvent(this.manager.operationremove);
@@ -491,11 +498,19 @@ class RecipeWaiter {
      * @param {HTMLElement} op
      */
     triggerArgEvents(op) {
-        // Trigger populateOption and argSelector events
+        // Trigger argSelector events and populateOption events only where the target is empty.
+        // When loading a saved recipe, arguments are populated before this method is called, so
+        // re-triggering populateOption events would overwrite saved custom values with defaults.
+        const args = op.querySelectorAll(".arg");
         const triggerableOptions = op.querySelectorAll(".populate-option, .arg-selector");
         const evt = new Event("change", {bubbles: true});
+
         if (triggerableOptions.length) {
             for (const el of triggerableOptions) {
+                if (el.classList.contains("populate-option")) {
+                    const target = args[el.getAttribute("data-target")];
+                    if (target && target.value !== "") continue;
+                }
                 el.dispatchEvent(evt);
             }
         }

@@ -86,24 +86,19 @@ class NodeRecipe {
     /**
      * Run the dish through each operation, one at a time.
      * @param {NodeDish} dish
-     * @returns {NodeDish|Promise<NodeDish>}
+     * @returns {Promise<NodeDish>}
      */
-    execute(dish) {
-        return this.opList.reduce((prev, curr) => {
-            const runOp = (input) => {
-                if (Object.prototype.hasOwnProperty.call(curr, "op") &&
-                    Object.prototype.hasOwnProperty.call(curr, "args")) {
-                    return curr.op(input, curr.args);
-                }
-                return curr(input);
-            };
-
-            if (prev && typeof prev.then === "function") {
-                return prev.then(runOp);
+    async execute(dish) {
+        let prev = dish;
+        for (const curr of this.opList) {
+            if (Object.prototype.hasOwnProperty.call(curr, "op") &&
+                Object.prototype.hasOwnProperty.call(curr, "args")) {
+                prev = await curr.op(prev, curr.args);
+            } else {
+                prev = await curr(prev);
             }
-
-            return runOp(prev);
-        }, dish);
+        }
+        return prev;
     }
 }
 
