@@ -39,7 +39,7 @@ self.maxTabs = 1;
  * @property {number} encoding
  * @property {string} eolSequence
  */
-self.inputs = {};
+self.inputs = Object.create(null);
 self.loaderWorkers = [];
 self.pendingFiles = [];
 self.currentInputNum = 1;
@@ -784,11 +784,13 @@ self.addInput = function(
             log.error(`Invalid input type '${type}'.`);
             return -1;
     }
-    // Validate inputNum is a safe non-negative integer before using as object key
-    if (!Number.isInteger(inputNum) || inputNum < 0) {
+    // inputNum can come from a message (e.g. the active tab when loading files),
+    // so only ever use a parsed, non-negative integer as the object key
+    if (!Number.isSafeInteger(inputNum) || inputNum < 0) {
         log.error(`Invalid inputNum: ${inputNum}`);
         return -1;
     }
+    inputNum = parseInt(inputNum, 10);
     workerScope.inputs[inputNum] = newInputObj;
 
     // Tell the inputWaiter we've added an input, so it can create a tab to display it
@@ -812,7 +814,7 @@ self.addInput = function(
  * @param {boolean} removeInputData.removeChefWorker - If true, remove a chefWorker from the WorkerWaiter
  */
 self.removeInput = function(removeInputData) {
-    const inputNum = removeInputData.inputNum;
+    const inputNum = parseInt(removeInputData.inputNum, 10);
     const refreshTabs = removeInputData.refreshTabs;
     self.numInputs--;
 
@@ -834,7 +836,7 @@ self.removeInput = function(removeInputData) {
     }
 
     // Validate inputNum before use as object key to prevent property injection
-    if (Number.isInteger(inputNum) && inputNum >= 0) {
+    if (inputNum >= 0) {
         delete self.inputs[inputNum];
     }
 
