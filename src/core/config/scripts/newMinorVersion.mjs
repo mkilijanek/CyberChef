@@ -16,6 +16,20 @@ import { execSync } from "child_process";
 
 const ignoredAuthors = ["github-advanced-security[bot]", "dependabot[bot]"];
 
+// GitHub logins: alphanumerics and hyphens, at most 39 characters, plus app bots
+const GITHUB_LOGIN = /^[A-Za-z0-9][A-Za-z0-9-]{0,38}(?:\[bot\])?$/;
+
+/**
+ * Logins come from the GitHub API and from commit trailers, and end up in Markdown
+ * links in CHANGELOG.md, so reject anything that is not a plausible login.
+ */
+function checkLogin(login) {
+    if (typeof login !== "string" || !GITHUB_LOGIN.test(login)) {
+        throw new Error(`Unexpected GitHub login: ${JSON.stringify(login)}`);
+    }
+    return login;
+}
+
 async function main() {
     const dir = path.join(process.cwd() + "/src/core/config/");
     if (!fs.existsSync(dir)) {
@@ -95,7 +109,7 @@ async function main() {
             }
 
             if (!ignoredAuthors.includes(commit.author.login)) {
-                feature.authors.push(commit.author.login);
+                feature.authors.push(checkLogin(commit.author.login));
             }
 
             if (msgparts.length > 1) {
@@ -126,7 +140,7 @@ async function main() {
                             );
                         }
                         if (!ignoredAuthors.includes(coAuthor)) {
-                            feature.authors.push(coAuthor);
+                            feature.authors.push(checkLogin(coAuthor));
                         }
                     });
             }
@@ -172,7 +186,7 @@ async function main() {
     // Message
     changelogData = changelogData.replace(
         /## Details\n\n/,
-        "## Details\n\n" + message + "\n",
+        () => "## Details\n\n" + message + "\n",
     );
 
     // Tag
@@ -186,7 +200,7 @@ async function main() {
     authors.forEach((author) => {
         changelogData = changelogData.replace(
             /(\n\[@[^\]]+\]: https:\/\/github\.com\/[^\n]+\n)\n/,
-            "$1" + author + "\n\n",
+            (_, last) => last + author + "\n\n",
         );
     });
 
@@ -194,7 +208,7 @@ async function main() {
     commitIDs.forEach((commitID) => {
         changelogData = changelogData.replace(
             /(\n\[[^\].]+\]: https:\/\/github.com\/gchq\/CyberChef\/commit\/[^\n]+\n)\n/,
-            "$1" + commitID + "\n\n",
+            (_, last) => last + commitID + "\n\n",
         );
     });
 
@@ -202,7 +216,7 @@ async function main() {
     prIDs.forEach((prID) => {
         changelogData = changelogData.replace(
             /(\n\[#[^\]]+\]: https:\/\/github.com\/gchq\/CyberChef\/(?:pull|issues)\/[^\n]+\n)\n*$/,
-            "$1" + prID + "\n\n",
+            (_, last) => last + prID + "\n\n",
         );
     });
 
