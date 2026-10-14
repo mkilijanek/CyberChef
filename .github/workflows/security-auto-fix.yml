@@ -28,19 +28,19 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
       - name: Setup Node.js
-        uses: actions/setup-node@v7
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: 'npm'
 
       - name: Cache node modules
-        uses: actions/cache@v6
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.npm
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
@@ -161,10 +161,11 @@ jobs:
       - name: Generate detailed report
         if: always()
         run: |
+          REPORT_DATE=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
           cat > SECURITY_FIX_REPORT.md << 'EOF'
           # 🔒 Security Vulnerability Auto-Fix Report
 
-          **Date:** $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Date:** __REPORT_DATE__
           **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
           ## 📊 Vulnerability Summary
@@ -180,6 +181,7 @@ jobs:
           ## 🔧 Actions Taken
 
           EOF
+          sed -i "s/__REPORT_DATE__/${REPORT_DATE}/" SECURITY_FIX_REPORT.md
 
           if [ "${{ steps.fix_critical.outputs.changed }}" == "true" ]; then
             echo "✅ Applied automatic fixes for high/critical vulnerabilities" >> SECURITY_FIX_REPORT.md
@@ -209,9 +211,14 @@ jobs:
           steps.fix_critical.outputs.changed == 'true' &&
           steps.test.outputs.tests_passed == 'true' &&
           (github.event.inputs.create_pr == 'true' || github.event_name == 'schedule')
-        uses: peter-evans/create-pull-request@v8
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          # PRs opened with GITHUB_TOKEN do not trigger other workflows, so
+          # pull_requests.yml (lint, tests, UI tests, build) would not run on
+          # them. Set SECURITY_AUTOFIX_TOKEN to a fine-grained PAT or GitHub App
+          # token (contents + pull-requests write) to get CI on these PRs;
+          # without it, run CI on the PR manually before merging.
+          token: ${{ secrets.SECURITY_AUTOFIX_TOKEN || secrets.GITHUB_TOKEN }}
           commit-message: |
             🔒 Security: Auto-fix vulnerabilities (Critical: ${{ steps.audit.outputs.critical }}, High: ${{ steps.audit.outputs.high }})
 
@@ -255,7 +262,7 @@ jobs:
 
             See [SECURITY_FIX_REPORT.md](./SECURITY_FIX_REPORT.md) for detailed information.
 
-            /cc @security-team
+            ${{ secrets.SECURITY_AUTOFIX_TOKEN == '' && '> **Note:** this PR was opened with `GITHUB_TOKEN`, so the pull request CI workflow has not run. Run it manually (or push a commit with a personal token) before merging.' || '' }}
           labels: |
             security
             dependencies
@@ -268,7 +275,7 @@ jobs:
         if: |
           steps.audit.outputs.critical > 0 &&
           steps.fix_critical.outputs.changed == 'false'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const audit = require('./audit-results.json');
@@ -315,7 +322,7 @@ jobs:
 
       - name: Upload audit results
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: security-audit-results
           path: |
