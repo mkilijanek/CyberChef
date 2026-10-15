@@ -1,0 +1,11 @@
+PR requested: remove eval() from OutputWaiter
+
+Base: master
+Head: claude/security-audit-85hinv
+
+Operations no longer emit <script> blocks in HTML output. They declare widgets
+(bar/scale charts, colour picker, map, tooltips) with data-* attributes, and
+src/web/utils/htmlOutputWidgets.mjs initialises them. Related: issue #126.
+
+Verified: operation tests 2374/2374 (7 new/changed tests fail without the fix),
+eslint clean, built app checked in Chromium. Node API and Nightwatch UI tests not run.
