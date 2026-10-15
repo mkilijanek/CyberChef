@@ -31,4 +31,5 @@ FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:9b87ad3dd9f431c733f19dfb27
 
 LABEL maintainer="GCHQ <oss@gchq.gov.uk>"
 
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/build/prod /usr/share/nginx/html/

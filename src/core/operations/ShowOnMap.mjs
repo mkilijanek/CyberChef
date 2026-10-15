@@ -101,8 +101,11 @@ class ShowOnMap extends Operation {
         const tileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
             tileAttribution = "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
             leafletUrl = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-            leafletCssUrl = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-        return `<link rel="stylesheet" href="${leafletCssUrl}" crossorigin=""/>
+            leafletCssUrl = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
+            // Subresource Integrity hashes for the exact Leaflet 1.9.4 files above
+            leafletJsIntegrity = "sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH",
+            leafletCssIntegrity = "sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H";
+        return `<link rel="stylesheet" href="${leafletCssUrl}" integrity="${leafletCssIntegrity}" crossorigin="anonymous"/>
 <style>
     #output-text .cm-content,
     #output-text .cm-line,
@@ -125,6 +128,8 @@ mapscript.onload = function() {
         .bindPopup('${data}')
         .openPopup();
 };
+mapscript.integrity = "${leafletJsIntegrity}";
+mapscript.crossOrigin = "anonymous";
 mapscript.src = "${leafletUrl}";
 </script>`;
     }
