@@ -224,14 +224,14 @@ export function encryptPad(key, plaintext, signature, paddingSize) {
     checkKey(key);
     let padding = "";
 
-    // Use cryptographically secure random if available, otherwise fallback to Math.random
+    // Padding must come from a cryptographically secure source; fail closed rather than fall back to Math.random
     const getSecureRandom = () => {
-        if (typeof crypto !== "undefined" && crypto.getRandomValues) {
-            const array = new Uint32Array(1);
-            crypto.getRandomValues(array);
-            return array[0] / (0xFFFFFFFF + 1);
+        if (typeof crypto === "undefined" || !crypto.getRandomValues) {
+            throw new OperationError("A cryptographically secure random number generator is required for LS47 padding.");
         }
-        return Math.random();
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        return array[0] / (0xFFFFFFFF + 1);
     };
 
     for (let i = 0; i < paddingSize; i++) {
