@@ -242,9 +242,27 @@ TestRegister.addTests([
         ]
     },
     {
+        // GHSA-5v7r-6r5c-r473: file-type 16 (used by jimp 1.6.0) loops forever on an ASF
+        // header with a zero-size sub-object. Image operations must reject non-image
+        // input before it reaches Jimp.read.
+        name: "View Bit Plane: ASF header is rejected before decoding",
+        input: "3026b2758e66cf11a6d900aa0062ce6c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        expectedOutput: "Please enter a valid image file.",
+        recipeConfig: [
+            {
+                op: "From Hex",
+                args: ["None"]
+            },
+            {
+                op: "View Bit Plane",
+                args: ["Red", 0]
+            }
+        ]
+    },
+    {
         name: "View Bit Plane: malformed PNG",
         input: PNG_HEX.replace("49484452", "49424452"),
-        expectedOutput: "Error loading image. (Error: Could not find MIME for Buffer)",
+        expectedOutput: "Error loading image. (Error: unrecognised content at end of stream)",
         recipeConfig: [
             {
                 op: "From Hex",
