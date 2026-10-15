@@ -4,6 +4,8 @@
 **Data:** 2025-12-18
 **Status:** Gotowe do wdrożenia
 
+> **Uwaga (2026-10):** workflow `security-auto-fix.yml` został usunięty (#105). Aktualizacje zależności npm obsługuje wyłącznie Dependabot (`.github/dependabot.yml`), a dzienny `npm audit fix` kolidował z jego PR-ami. Lokalnie nadal działają `npm run security:triage` i `npm run security:fix`. Opisy workflow poniżej są historyczne.
+
 ---
 
 ## 📋 Spis Treści
@@ -43,20 +45,6 @@ System automatycznego zarządzania podatnościami dla CyberChef, zaprojektowany 
 ## 🧩 Komponenty
 
 ### 1. GitHub Actions Workflows
-
-#### `security-auto-fix.yml` - Główny Workflow Automatyczny
-**Harmonogram:** Codziennie o 2:00 UTC
-**Funkcje:**
-- Skanowanie npm audit
-- Automatyczne naprawy (npm audit fix)
-- Testy po naprawach
-- Tworzenie PR z poprawkami
-- Tworzenie Issues dla nienaprawialnych podatności
-
-**Triggery:**
-- Schedule (codziennie)
-- Manual dispatch
-- Push do main (dla package.json)
 
 #### `dependency-review.yml` - Przegląd Zależności w PR
 **Triggery:** Pull Requests
@@ -106,70 +94,7 @@ System automatycznego zarządzania podatnościami dla CyberChef, zaprojektowany 
 
 ### Security Auto-Fix Workflow
 
-#### Kroki Wykonania
-
-```yaml
-1. Checkout repository
-2. Setup Node.js + cache
-3. Install dependencies
-4. Run npm audit
-   ├─ Count vulnerabilities by severity
-   ├─ Check for actively exploited CVEs
-   └─ Generate audit-results.json
-
-5. Backup package files
-6. Apply fixes (Critical & High)
-   ├─ npm audit fix --audit-level=high
-   └─ Check if changes were made
-
-7. Apply force fixes (if Critical exists)
-   ├─ npm audit fix --force
-   └─ Only for CRITICAL vulnerabilities
-
-8. Run tests
-   ├─ npm test
-   ├─ If PASS: continue
-   └─ If FAIL: restore backup & exit
-
-9. Generate report
-   └─ Create SECURITY_FIX_REPORT.md
-
-10. Create Pull Request
-    ├─ Branch: security/auto-fix-{run_number}
-    ├─ Title: With vulnerability counts
-    ├─ Body: Detailed report
-    └─ Labels: security, dependencies, priority-*
-
-11. Create Issue (if unfixable critical)
-    └─ Alert security team
-
-12. Upload artifacts
-    └─ Store audit results for 90 days
-```
-
-#### Parametry Wejściowe (Manual Dispatch)
-
-```bash
-# Minimum severity to fix
-severity_threshold: low | moderate | high | critical
-default: high
-
-# Create PR vs direct commit
-create_pr: true | false
-default: true
-```
-
-#### Przykładowe Użycie
-
-```bash
-# Manual trigger via GitHub UI
-Actions → Security Auto-Fix → Run workflow
-
-# Manual trigger via CLI
-gh workflow run security-auto-fix.yml \
-  -f severity_threshold=critical \
-  -f create_pr=true
-```
+Usunięty (#105). Zastąpiony przez Dependabot; lokalnie: `npm run security:fix`.
 
 ---
 
@@ -335,7 +260,6 @@ SECURITY_TOKEN=ghp_xxxxxxxxxxxx
 gh workflow list
 
 # Włącz ręcznie (jeśli wyłączone)
-gh workflow enable security-auto-fix.yml
 gh workflow enable dependency-review.yml
 gh workflow enable codeql-analysis.yml
 ```
@@ -375,23 +299,7 @@ Branch name pattern: main
 
 ### Scenariusz 1: Codzienny Automatyczny Skan
 
-**Workflow:** Automatyczny, codziennie o 2:00 UTC
-
-1. Workflow uruchamia się automatycznie
-2. Skanuje npm audit
-3. Jeśli znajdzie podatności critical/high:
-   - Próbuje naprawić automatycznie
-   - Uruchamia testy
-   - Tworzy PR z poprawkami
-4. Jeśli nie może naprawić:
-   - Tworzy Issue z alertem
-   - Przypisuje security team
-
-**Akcje użytkownika:**
-- 📧 Otrzymujesz powiadomienie o PR/Issue
-- 👀 Przegląd PR
-- ✅ Merge lub request changes
-- 🔍 Review Issues dla nienaprawialnych
+Nie dotyczy: dzienny workflow został usunięty (#105). Dependabot otwiera cotygodniowe PR-y z aktualizacjami i natychmiastowe PR-y dla alertów bezpieczeństwa.
 
 ### Scenariusz 2: Pull Request z Nowymi Zależnościami
 
@@ -447,7 +355,7 @@ npm run security:triage || echo "Vulnerabilities found!"
 1. 🚨 **IMMEDIATE:** Dodaj GHSA ID do `ACTIVELY_EXPLOITED` w `vulnerability-triage.js`
 2. ⚡ **Uruchom manual workflow:**
    ```bash
-   gh workflow run security-auto-fix.yml
+   npm run security:fix
    ```
 3. 📞 **Notify team** o urgency
 4. ✅ **Review i merge** PR natychmiast
@@ -522,15 +430,11 @@ Settings → Notifications → Actions
 gh workflow list
 
 # 2. Włącz jeśli disabled
-gh workflow enable security-auto-fix.yml
 
 # 3. Sprawdź permissions
 # Repository → Settings → Actions → General
 # ☑ Allow all actions
 # ☑ Read and write permissions
-
-# 4. Manual trigger test
-gh workflow run security-auto-fix.yml
 ```
 
 ### Problem 2: Tests Fail After Fixes
@@ -700,7 +604,6 @@ Infrastructure:
 ☐ Permissions configured
 
 Workflows:
-☐ security-auto-fix.yml tested
 ☐ dependency-review.yml tested
 ☐ codeql-analysis.yml tested
 ☐ All workflows enabled
