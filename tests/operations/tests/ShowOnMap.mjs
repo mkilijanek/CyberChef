@@ -12,8 +12,10 @@ TestRegister.addTests([
     {
         name: "Show on map: valid coordinate pair",
         input: "51.5007, -0.1246",
-        // The presented output is the Leaflet map HTML; just check the coordinates made it through.
-        expectedMatch: /51\.5007,-0\.1246/,
+        // The presented output declares the map via data attributes; the web app creates it.
+        // (TestRegister passes if ANY of expectedOutput/expectedMatch/unexpectedMatch holds, so the
+        // "no script" condition is folded into a single pattern.)
+        expectedMatch: /^(?![\s\S]*<\s*script)[\s\S]*data-map data-lat="51\.5007" data-lng="-0\.1246" data-zoom="13"/i,
         recipeConfig: [
             {
                 op: "Show on map",

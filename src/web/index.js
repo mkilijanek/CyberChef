@@ -13,7 +13,6 @@ import "snackbarjs";
 import "bootstrap-material-design/js/index";
 import "bootstrap-colorpicker";
 import moment from "moment-timezone";
-import * as CanvasComponents from "../core/lib/CanvasComponents.mjs";
 
 // CyberChef
 import App from "./App.mjs";
@@ -62,9 +61,6 @@ function main() {
 
 window.compileTime = moment.tz(COMPILE_TIME, "DD/MM/YYYY HH:mm:ss z", "UTC").valueOf();
 window.compileMessage = COMPILE_MSG;
-
-// Make libs available to operation outputs
-window.CanvasComponents = CanvasComponents;
 
 document.addEventListener("DOMContentLoaded", main, false);
 

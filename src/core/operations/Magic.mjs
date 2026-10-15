@@ -154,7 +154,7 @@ class Magic extends Operation {
             </tr>`;
         });
 
-        output += "</table><script type='application/javascript'>$('[data-toggle=\"tooltip\"]').tooltip()</script>";
+        output += "</table>";
 
         if (!options.length) {
             output = "Nothing of interest could be detected about the input data.\nHave you tried modifying the operation arguments?";

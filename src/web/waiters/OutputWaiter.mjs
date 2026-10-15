@@ -38,6 +38,7 @@ import {
 
 import {statusBar} from "../utils/statusBar.mjs";
 import {htmlPlugin} from "../utils/htmlWidget.mjs";
+import {initHtmlOutputWidgets} from "../utils/htmlOutputWidgets.mjs";
 import {copyOverride} from "../utils/copyOverride.mjs";
 import {eolCodeToSeq, eolCodeToName, renderSpecialChar} from "../utils/editorUtils.mjs";
 
@@ -365,16 +366,9 @@ class OutputWaiter {
         // Add class to #output-text to change display settings
         this.outputTextEl.classList.add("html-output");
 
-        // Execute script sections
-        const outputHTML = document.getElementById("output-html");
-        const scriptElements = outputHTML ? outputHTML.querySelectorAll("script") : [];
-        for (let i = 0; i < scriptElements.length; i++) {
-            try {
-                eval(scriptElements[i].innerHTML); // eslint-disable-line no-eval
-            } catch (err) {
-                log.error(err);
-            }
-        }
+        // Initialise interactive widgets declared by the operation output.
+        // Operation-supplied scripts are never executed.
+        initHtmlOutputWidgets(document.getElementById("output-html"), this.app);
     }
 
     /**

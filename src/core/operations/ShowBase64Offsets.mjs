@@ -65,8 +65,7 @@ class ShowBase64Offsets extends Operation {
 
         const len0 = offset0.indexOf("="),
             len1 = offset1.indexOf("="),
-            len2 = offset2.indexOf("="),
-            script = "<script type='application/javascript'>$('[data-toggle=\"tooltip\"]').tooltip()</script>";
+            len2 = offset2.indexOf("=");
 
         if (input.length < 1) {
             throw new OperationError("Please enter a string.");
@@ -163,8 +162,7 @@ class ShowBase64Offsets extends Operation {
             "\nHover over the static sections to see what they decode to on their own.\n" +
             "\nOffset 0: " + offset0 +
             "\nOffset 1: " + offset1 +
-            "\nOffset 2: " + offset2 +
-            script :
+            "\nOffset 2: " + offset2 :
             offset0 + "\n" + offset1 + "\n" + offset2);
     }
 
