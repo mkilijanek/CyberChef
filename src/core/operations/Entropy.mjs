@@ -349,7 +349,7 @@ class Entropy extends Operation {
      */
     createShannonEntropyVisualization(entropy) {
         return `Shannon entropy: ${entropy}
-        <br><canvas data-chart="scale" data-value='${Number(entropy)}' data-max='8' data-height-ratio='0.25' data-max-height='150' data-markings='[{"label":"English text","min":3.5,"max":5},{"label":"Encrypted/compressed","min":7.5,"max":8}]'></canvas><br>
+        <br><canvas id='chart-area' data-chart="scale" data-value='${Number(entropy)}' data-max='8' data-height-ratio='0.25' data-max-height='150' data-markings='[{"label":"English text","min":3.5,"max":5},{"label":"Encrypted/compressed","min":7.5,"max":8}]'></canvas><br>
         - 0 represents no randomness (i.e. all the bytes in the data have the same value) whereas 8, the maximum, represents a completely random string.
         - Standard English text usually falls somewhere between 3.5 and 5.
         - Properly encrypted or compressed data of a reasonable length should have an entropy of over 7.5.

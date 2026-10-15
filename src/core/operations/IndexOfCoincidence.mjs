@@ -69,7 +69,7 @@ class IndexOfCoincidence extends Operation {
     present(ic) {
         return `Index of Coincidence: ${ic}
 Normalized: ${ic * 26}
-<br><canvas data-chart="scale" data-value='${Number(ic)}' data-max='0.25' data-height-ratio='0.25' data-markings='[{"label":"English text","min":0.05,"max":0.08},{"label":"> 0.25","min":0.24,"max":0.25}]'></canvas><br>
+<br><canvas id='chart-area' data-chart="scale" data-value='${Number(ic)}' data-max='0.25' data-height-ratio='0.25' data-markings='[{"label":"English text","min":0.05,"max":0.08},{"label":"> 0.25","min":0.24,"max":0.25}]'></canvas><br>
 - 0 represents complete randomness (all characters are unique), whereas 1 represents no randomness (all characters are identical).
 - English text generally has an IC of between 0.67 to 0.78.
 - 'Random' text is determined by the probability that each letter occurs the same number of times as another.

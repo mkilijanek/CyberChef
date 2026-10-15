@@ -85,7 +85,7 @@ class FrequencyDistribution extends Operation {
 
         // Print
         // The chart is drawn by the web app (src/web/utils/htmlOutputWidgets.mjs) from these data attributes
-        let output = `<canvas data-chart="bar" data-scores='${JSON.stringify(freq.percentages.map(Number))}'></canvas><br>
+        let output = `<canvas id='chart-area' data-chart="bar" data-scores='${JSON.stringify(freq.percentages.map(Number))}'></canvas><br>
 Total data length: ${freq.dataLength}
 Number of bytes represented: ${freq.bytesRepresented}
 Number of bytes not represented: ${256 - freq.bytesRepresented}
