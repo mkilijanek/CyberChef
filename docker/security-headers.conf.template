@@ -1,0 +1,24 @@
+# Baseline hardening headers (see issue #126).
+#
+# This file is included in the http context by the base image's nginx.conf
+# (include /etc/nginx/conf.d/*.conf), so the headers apply to the base image's default server.
+# The base image's own default.conf is deliberately left in place: its entrypoint rewrites the
+# listen directives on hosts without IPv6, which a replacement default.conf would break.
+#
+# script-src notes:
+#  - 'self' and blob:  the app bundle, and the Web Workers it creates from blob: URLs.
+#  - 'unsafe-eval'     required by dependencies that compile code at runtime
+#                      (e.g. the Template operation's Handlebars). It also covers WebAssembly.
+#  - unpkg.com/leaflet@1.9.4/dist/leaflet.js  the Show on map operation loads Leaflet (pinned with SRI).
+#                      Deliberately a full path, not the host: a host source would allow ANY package
+#                      published on unpkg, so an injected <iframe srcdoc> could load an attacker's script.
+#  - sha256 hashes     the app's own inline <script> blocks in index.html and in the embedded Bombe
+#                      SVG animation (including its onload handler, hence 'unsafe-hashes'); generated
+#                      from the build output by scripts/generate-nginx-conf.mjs. 'unsafe-inline' is
+#                      NOT allowed, so injected inline scripts and event handlers are blocked.
+#
+# object-src data: is needed because the Bombe loading animation is a data: URI loaded in an <object>
+# (it needs its script to run, so <img> is not an option). The document inherits this policy.
+add_header X-Content-Type-Options "nosniff" always;
+add_header Referrer-Policy "no-referrer" always;
+add_header Content-Security-Policy "script-src 'self' 'unsafe-eval' blob: https://unpkg.com/leaflet@1.9.4/dist/leaflet.js __INLINE_SCRIPT_HASHES__; object-src data:; base-uri 'self'; form-action 'self'; frame-ancestors 'self'" always;

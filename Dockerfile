@@ -24,6 +24,9 @@ RUN npm run postinstall
 # Build the app
 RUN npm run build
 
+# Generate the security headers config; its CSP lists hashes of the inline scripts in the build output
+RUN node scripts/generate-nginx-conf.mjs build/prod docker/security-headers.conf.template /app/security-headers.conf
+
 #########################################
 # Package static build files into nginx #
 #########################################
@@ -31,5 +34,5 @@ FROM nginxinc/nginx-unprivileged:stable-alpine@sha256:9b87ad3dd9f431c733f19dfb27
 
 LABEL maintainer="GCHQ <oss@gchq.gov.uk>"
 
-COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=builder /app/security-headers.conf /etc/nginx/conf.d/security-headers.conf
 COPY --from=builder /app/build/prod /usr/share/nginx/html/

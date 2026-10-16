@@ -69,36 +69,13 @@ class IndexOfCoincidence extends Operation {
     present(ic) {
         return `Index of Coincidence: ${ic}
 Normalized: ${ic * 26}
-<br><canvas id='chart-area'></canvas><br>
+<br><canvas id='chart-area' data-chart="scale" data-value='${Number(ic)}' data-max='0.25' data-height-ratio='0.25' data-markings='[{"label":"English text","min":0.05,"max":0.08},{"label":"> 0.25","min":0.24,"max":0.25}]'></canvas><br>
 - 0 represents complete randomness (all characters are unique), whereas 1 represents no randomness (all characters are identical).
 - English text generally has an IC of between 0.67 to 0.78.
 - 'Random' text is determined by the probability that each letter occurs the same number of times as another.
 
 The graph shows the IC of the input data. A low IC generally means that the text is random, compressed or encrypted.
 
-<script type='application/javascript'>
-  var canvas = document.getElementById("chart-area"),
-      parentRect = canvas.closest(".cm-scroller").getBoundingClientRect(),
-      ic = ${ic};
-
-  canvas.width = parentRect.width * 0.95;
-  canvas.height = parentRect.height * 0.25;
-
-  ic = ic > 0.25 ? 0.25 : ic;
-
-  CanvasComponents.drawScaleBar(canvas, ic, 0.25, [
-    {
-      label: "English text",
-      min: 0.05,
-      max: 0.08
-    },
-    {
-      label: "> 0.25",
-      min: 0.24,
-      max: 0.25
-    }
-  ]);
-</script>
      `;
     }
 

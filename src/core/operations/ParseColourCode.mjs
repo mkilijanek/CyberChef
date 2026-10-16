@@ -96,26 +96,14 @@ class ParseColourCode extends Operation {
             cmyk = "cmyk(" + c + ", " + m + ", " + y + ", " + k + ")";
 
         // Generate output
-        return `<div id="colorpicker" style="white-space: normal;"></div>
+        // The picker is initialised by the web app (src/web/utils/htmlOutputWidgets.mjs) from data-colour
+        return `<div data-colorpicker data-colour="${rgba}" style="white-space: normal;"></div>
 Hex:  ${hex}
 RGB:  ${rgb}
 RGBA: ${rgba}
 HSL:  ${hsl}
 HSLA: ${hsla}
-CMYK: ${cmyk}
-<script>
-    $('#colorpicker').colorpicker({
-        format: 'rgba',
-        color: '${rgba}',
-        container: true,
-        inline: true,
-        useAlpha: true
-    }).on('colorpickerChange', function(e) {
-        var color = e.color.string('rgba');
-        window.app.manager.input.setInput(color);
-        window.app.manager.input.inputChange(new Event("keyup"));
-    });
-</script>`;
+CMYK: ${cmyk}`;
     }
 
     /**

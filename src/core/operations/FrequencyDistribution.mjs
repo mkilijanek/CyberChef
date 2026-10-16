@@ -84,21 +84,12 @@ class FrequencyDistribution extends Operation {
         const [showZeroes, showAscii] = args;
 
         // Print
-        let output = `<canvas id='chart-area'></canvas><br>
+        // The chart is drawn by the web app (src/web/utils/htmlOutputWidgets.mjs) from these data attributes
+        let output = `<canvas id='chart-area' data-chart="bar" data-scores='${JSON.stringify(freq.percentages.map(Number))}'></canvas><br>
 Total data length: ${freq.dataLength}
 Number of bytes represented: ${freq.bytesRepresented}
 Number of bytes not represented: ${256 - freq.bytesRepresented}
 
-<script>
-    var canvas = document.getElementById("chart-area"),
-        parentRect = canvas.closest(".cm-scroller").getBoundingClientRect(),
-        scores = ${JSON.stringify(freq.percentages)};
-
-    canvas.width = parentRect.width * 0.95;
-    canvas.height = parentRect.height * 0.9;
-
-    CanvasComponents.drawBarChart(canvas, scores, "Byte", "Frequency %", 16, 6);
-</script>
 <table class="table table-hover table-sm">
     <tr><th>Byte</th>${showAscii ? "<th>ASCII</th>" : ""}<th>Percentage</th><th></th></tr>`;
 

@@ -8,6 +8,7 @@
 import Operation from "../Operation.mjs";
 import {FORMATS, convertCoordinates} from "../lib/ConvertCoordinates.mjs";
 import OperationError from "../errors/OperationError.mjs";
+import Utils from "../Utils.mjs";
 
 /**
  * Show on map operation
@@ -97,16 +98,16 @@ class ShowOnMap extends Operation {
         if (data.replace(/\s+/g, "") === "") {
             data = "0, 0";
         }
-        const zoomLevel = args[0];
-        const tileUrl = "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            tileAttribution = "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors",
-            leafletUrl = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js",
-            leafletCssUrl = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-            // Subresource Integrity hashes for the exact Leaflet 1.9.4 files above
-            leafletJsIntegrity = "sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH",
-            leafletCssIntegrity = "sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H";
-        return `<link rel="stylesheet" href="${leafletCssUrl}" integrity="${leafletCssIntegrity}" crossorigin="anonymous"/>
-<style>
+        const coords = data.split(",").map(v => v.trim());
+        const lat = Number(coords[0]),
+            lng = Number(coords[1]),
+            zoom = Number(args[0]);
+        if (coords.length !== 2 || coords.some(v => v === "") || !Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(zoom)) {
+            return Utils.escapeHtml(data);
+        }
+
+        // The map is created by the web app (src/web/utils/htmlOutputWidgets.mjs) from these data attributes
+        return `<style>
     #output-text .cm-content,
     #output-text .cm-line,
     #output-html {
@@ -114,24 +115,7 @@ class ShowOnMap extends Operation {
         white-space: normal;
     }
 </style>
-<div id="presentedMap" style="width: 100%; height: 100%;"></div>
-<script type="text/javascript">
-var mapscript = document.createElement('script');
-document.body.appendChild(mapscript);
-mapscript.onload = function() {
-    var presentMap = L.map('presentedMap').setView([${data}], ${zoomLevel});
-    L.tileLayer('${tileUrl}', {
-        attribution: '${tileAttribution}'
-    }).addTo(presentMap);
-
-    L.marker([${data}]).addTo(presentMap)
-        .bindPopup('${data}')
-        .openPopup();
-};
-mapscript.integrity = "${leafletJsIntegrity}";
-mapscript.crossOrigin = "anonymous";
-mapscript.src = "${leafletUrl}";
-</script>`;
+<div id="presentedMap" data-map data-lat="${lat}" data-lng="${lng}" data-zoom="${zoom}" style="width: 100%; height: 100%;"></div>`;
     }
 }
 
