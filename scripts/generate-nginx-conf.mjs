@@ -1,5 +1,5 @@
 /**
- * Generates the nginx configuration for the Docker image from docker/nginx.conf.template.
+ * Generates the nginx configuration for the Docker image from docker/security-headers.conf.template.
  *
  * The Content-Security-Policy script-src directive must list a SHA-256 hash for
  * every inline <script> block in the built HTML pages. Those blocks change with

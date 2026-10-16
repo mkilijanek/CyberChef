@@ -13,3 +13,12 @@ Verified:
 - tests/node: 314/314
 - Nightwatch UI (built app, Chromium 141): 2433 assertions, all passing
 - eslint clean on changed files
+
+Also on this branch: script-src added to the Docker image CSP (hashes generated at build time by
+scripts/generate-nginx-conf.mjs; delivered as a headers-only conf.d drop-in so the base image's default.conf
+and its IPv6 handling stay intact). object-src relaxed from 'none' to data: because 'none' stopped the Bombe
+loading animation from loading. Verified: nginx -t in the nginx-unprivileged image; headers served by the
+container; browser checks (11 operations, Bombe animation, injected inline script blocked) against the
+container; Nightwatch UI under the CSP: 2433 assertions passing; tests/node 320/320.
+Not verified: the full multi-stage Dockerfile build (npm ci/build inside Docker) and the pinned base image digest
+(Docker Hub rate-limited; used mirror.gcr.io's stable-alpine for the runtime-stage check).
